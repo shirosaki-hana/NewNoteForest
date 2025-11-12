@@ -11,11 +11,10 @@ import type { CookieSerializeOptions } from '@fastify/cookie';
 const SESSION_TTL_MS = ms(env.SESSION_TTL);
 
 // 세션 토큰 메모리 캐시: token -> expiresAt(ms)
-// 단일 사용자 VOD 특성상 메모리 캐시만으로도 큰 이점이 있음
 const sessionCache = new Map<string, number>();
 
 /**
- * 안전한 세션 토큰 생성 (96자 hex 문자열)
+ * 세션 토큰 생성 (96자 hex 문자열)
  */
 function generateToken(): string {
   return randomBytes(48).toString('hex');

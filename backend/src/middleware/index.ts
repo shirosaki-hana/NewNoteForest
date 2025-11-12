@@ -1,1 +1,1 @@
-export { requireAuth } from './auth.js';
+export { requireAuth } from './auth.middleware.js';

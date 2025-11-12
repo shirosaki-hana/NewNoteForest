@@ -1,5 +1,5 @@
 import { PrismaClient } from '../database/prismaclient/index.js';
-import { logger } from '../utils/log.js';
+import { logger } from '../utils/index.js';
 import { isDevelopment } from '../config/index.js';
 //------------------------------------------------------------------------------//
 const globalForPrisma = globalThis as unknown as {

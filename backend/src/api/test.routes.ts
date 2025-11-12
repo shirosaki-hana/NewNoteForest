@@ -1,5 +1,5 @@
 import { type FastifyPluginAsync } from 'fastify';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/index.js';
 //------------------------------------------------------------------------------//
 
 export const testRoutes: FastifyPluginAsync = async fastify => {

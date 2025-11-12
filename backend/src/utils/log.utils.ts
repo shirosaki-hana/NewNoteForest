@@ -1,5 +1,5 @@
 import ansi from 'ansi-colors';
-import { isDevelopment } from '../config/env.js';
+import { isDevelopment } from '../config/index.js';
 //------------------------------------------------------------------------------//
 // 시간 포맷팅 함수
 const getTimestamp = (): string => {

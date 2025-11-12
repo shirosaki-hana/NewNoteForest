@@ -1,2 +1,2 @@
-export * from './log.js';
-export * from './dir.js';
+export * from './log.utils.js';
+export * from './dir.utils.js';

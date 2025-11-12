@@ -8,7 +8,7 @@ import {
   SetupPasswordResponseSchema,
 } from '@noteforest/types';
 import { env } from '../config/index.js';
-import { authenticateByToken, getCookieOptions, isPasswordSetup, login, logoutByToken, setupPassword } from '../services/auth.js';
+import { authenticateByToken, getCookieOptions, isPasswordSetup, login, logoutByToken, setupPassword } from '../services/index.js';
 //------------------------------------------------------------------------------//
 export const authRoutes: FastifyPluginAsync = async fastify => {
   // 상태 조회: 최초 설정 여부, 인증 여부

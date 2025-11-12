@@ -1,6 +1,6 @@
 import path from 'path';
 import ms from 'ms';
-import { env, isDevelopment, isProduction } from './env.js';
+import { env, isDevelopment, isProduction } from './env.config.js';
 import { projectRoot } from '../utils/index.js';
 //------------------------------------------------------------------------------//
 export const fastifyConfig = { bodyLimit: parseInt(env.REQUEST_BODY_LIMIT.replace('mb', '')) * 1024 * 1024 };

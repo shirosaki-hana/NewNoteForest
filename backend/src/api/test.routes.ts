@@ -6,6 +6,6 @@ export const testRoutes: FastifyPluginAsync = async fastify => {
   fastify.addHook('preHandler', requireAuth);
 
   fastify.get('/ping', async (_request, reply) => {
-    return reply.send({request: 'pong'})
+    return reply.send({ request: 'pong' });
   });
 };

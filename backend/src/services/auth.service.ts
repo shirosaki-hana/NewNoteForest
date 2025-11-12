@@ -88,4 +88,3 @@ export function logoutByToken(token: string): void {
 export function authenticateByToken(token?: string | null): boolean {
   return validateSession(token);
 }
-

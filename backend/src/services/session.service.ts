@@ -120,4 +120,3 @@ export function pruneExpiredSessions(): number {
 export function getActiveSessionCount(): number {
   return sessionStore.size;
 }
-

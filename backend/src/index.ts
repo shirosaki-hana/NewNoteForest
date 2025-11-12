@@ -10,6 +10,7 @@ import { logger } from './utils/index.js';
 import { env, fastifyConfig, helmetConfig, rateLimitConfig, corsConfig, staticFilesConfig } from './config/index.js';
 import { checkDatabaseConnection, disconnectDatabase } from './database/index.js';
 import { notFoundHandler, errorHandler } from './handlers/index.js';
+import { startSessionPruning, stopSessionPruning } from './services/index.js';
 //------------------------------------------------------------------------------//
 
 // Fastify 서버 생성
@@ -33,7 +34,10 @@ async function createFastifyApp() {
 // 서버 시작 함수
 async function startServer(host: string, port: number) {
   logger.info(`Starting server... [Environment: ${env.NODE_ENV}]`);
+
   const fastify = await createFastifyApp();
+
+  startSessionPruning();
   await checkDatabaseConnection();
   await fastify.listen({ port, host: host });
   logger.success(`Server is running on http://${host}:${port}`);
@@ -46,6 +50,7 @@ async function gracefulShutdown(fastify: Awaited<ReturnType<typeof createFastify
   logger.warn(`Received ${signal}: shutting down server...`);
 
   try {
+    stopSessionPruning(); // 세션 정리 타이머 중지
     await fastify.close(); // Fastify 서버 종료
     await disconnectDatabase(); // 데이터베이스 연결 해제
     logger.success('Server closed successfully');

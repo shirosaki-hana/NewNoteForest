@@ -27,7 +27,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['production', 'development']).default('development'),
   REQUEST_BODY_LIMIT: z.string().default('3mb'),
   FRONTEND_URL: z.url().default('http://127.0.0.1'),
-  DATABASE_URL_SQLITE: z.string().default('file:./prisma/videoforest.db'),
+  DATABASE_URL_SQLITE: z.string().default('file:./prisma/noteforest.db'),
   SESSION_COOKIE: z.string().default('session'),
   SESSION_TTL: msStringSchema.default('24h'),
   RATELIMIT_MAX: z.coerce.number().positive().default(10),

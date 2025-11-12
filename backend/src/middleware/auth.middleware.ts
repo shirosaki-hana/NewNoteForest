@@ -8,9 +8,9 @@ import { authenticateByToken } from '../services/index.js';
  */
 export async function requireAuth(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const token = request.cookies?.[env.SESSION_COOKIE];
-  const isAuthenticated = await authenticateByToken(token);
+  const isAuthenticated = authenticateByToken(token);
 
   if (!isAuthenticated) {
-    reply.code(401).send({ error: 'Unauthorized' });
+    return reply.code(401).send({ error: 'Unauthorized' });
   }
 }

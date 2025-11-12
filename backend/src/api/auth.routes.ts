@@ -14,7 +14,8 @@ export const authRoutes: FastifyPluginAsync = async fastify => {
   // 상태 조회: 최초 설정 여부, 인증 여부
   fastify.get('/status', async (request, reply) => {
     const token = request.cookies?.[env.SESSION_COOKIE];
-    const [setup, authed] = await Promise.all([isPasswordSetup(), authenticateByToken(token)]);
+    const setup = await isPasswordSetup();
+    const authed = authenticateByToken(token);
     const body = { isSetup: setup, isAuthenticated: authed };
     return reply.send(AuthStatusResponseSchema.parse(body));
   });
@@ -38,7 +39,7 @@ export const authRoutes: FastifyPluginAsync = async fastify => {
   fastify.post('/logout', async (request, reply) => {
     const token = request.cookies?.[env.SESSION_COOKIE];
     if (token) {
-      await logoutByToken(token);
+      logoutByToken(token);
     }
     reply.clearCookie(env.SESSION_COOKIE, getCookieOptions());
     return reply.send(LogoutResponseSchema.parse({ success: true }));

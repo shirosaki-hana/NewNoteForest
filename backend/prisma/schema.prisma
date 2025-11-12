@@ -16,15 +16,3 @@ model Auth {
   
   @@map("auth")
 }
-
-//세션 테이블
-model Session {
-  id        String     @id @default(cuid())
-  token     String     @unique
-  ttl       Int
-  createdAt DateTime   @default(now())
-  
-  @@map("sessions")
-  @@index([token])
-  @@index([createdAt])
-}

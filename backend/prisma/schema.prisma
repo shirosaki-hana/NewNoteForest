@@ -16,3 +16,33 @@ model Auth {
   
   @@map("auth")
 }
+
+model Note {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String    // 본문 내용
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  noteTags  NoteTag[]
+  
+  @@map("notes")
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  noteTags  NoteTag[]
+  
+  @@map("tags")
+}
+
+model NoteTag {
+  noteId Int
+  tagId  Int
+  note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([noteId, tagId])
+  @@map("note_tags")
+}

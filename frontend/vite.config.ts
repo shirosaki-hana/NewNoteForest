@@ -23,9 +23,9 @@ export default defineConfig({
             if (id.includes('react') || id.includes('react-dom') || id.includes('axios') || id.includes('zustand')) {
               return 'vendor';
             }
-            if (id.includes('@mui')) {
-              return 'theme';
-            }
+            //if (id.includes('@mui')) {
+            //  return 'theme'; MUI가 왜 청크 분리하면 망가지는거지?
+            //}
           }
         },
       },

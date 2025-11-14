@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Alert } from '@mui/material';
 import { Login as LoginIcon } from '@mui/icons-material';
 import { useAuthStore } from '../stores/authStore';
-import AuthPageLayout from '../components/common/AuthPageLayout';
-import PasswordField from '../components/common/PasswordField';
+import AuthPageLayout from '../components/AuthPageLayout';
+import PasswordField from '../components/PasswordField';
 
 export default function LoginPage() {
   const { t } = useTranslation();

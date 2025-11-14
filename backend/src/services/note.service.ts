@@ -1,7 +1,17 @@
 import { database } from '../database/index.js';
-import { CreateNoteRequestSchema, UpdateNoteRequestSchema, ListNotesQuerySchema } from '@noteforest/types';
+import { 
+  CreateNoteRequestSchema, 
+  UpdateNoteRequestSchema, 
+  ListNotesQuerySchema,
+} from '@noteforest/types';
 
-import type { CreateNoteRequest, UpdateNoteRequest, ListNotesQuery, Note, Tag } from '@noteforest/types';
+import type { 
+  CreateNoteRequest, 
+  UpdateNoteRequest, 
+  ListNotesQuery, 
+  Note, 
+  Tag,
+} from '@noteforest/types';
 import type { Note as PrismaNote, Tag as PrismaTag, NoteTag as PrismaNoteTag, Prisma } from '../database/prismaclient/index.js';
 
 //------------------------------------------------------------------------------//
@@ -27,11 +37,38 @@ function toNoteResponse(note: PrismaNote & { noteTags?: Array<PrismaNoteTag & { 
 }
 
 /**
+ * 참조되지 않는 고아 태그들을 정리
+ */
+async function cleanupOrphanTags(): Promise<void> {
+  // 어떤 노트에도 연결되지 않은 태그 찾기
+  const orphanTags = await database.tag.findMany({
+    where: {
+      noteTags: {
+        none: {},
+      },
+    },
+  });
+
+  // 고아 태그 삭제
+  if (orphanTags.length > 0) {
+    await database.tag.deleteMany({
+      where: {
+        id: { in: orphanTags.map(tag => tag.id) },
+      },
+    });
+  }
+}
+
+/**
  * 태그 이름 배열로 태그 생성 또는 조회 및 노트와 연결
+ * 이전에 연결되었던 태그가 고아가 되면 자동으로 정리함
  */
 async function syncNoteTags(noteId: number, tagNames: string[]): Promise<void> {
   // 기존 연결 제거
   await database.noteTag.deleteMany({ where: { noteId } });
+
+  // 고아 태그 자동 정리
+  await cleanupOrphanTags();
 
   if (tagNames.length === 0) {
     return;
@@ -145,7 +182,7 @@ export async function updateNote(id: number, body: unknown): Promise<Note> {
 }
 
 /**
- * 노트 삭제
+ * 노트 삭제 (고아 태그 자동 정리 포함)
  * @throws 노트를 찾을 수 없는 경우 statusCode 404 에러
  */
 export async function deleteNote(id: number): Promise<void> {
@@ -154,7 +191,11 @@ export async function deleteNote(id: number): Promise<void> {
     throw Object.assign(new Error('Note not found'), { statusCode: 404 });
   }
 
+  // 노트 삭제 (Cascade로 NoteTag도 자동 삭제됨)
   await database.note.delete({ where: { id } });
+
+  // 고아 태그 자동 정리
+  await cleanupOrphanTags();
 }
 
 /**

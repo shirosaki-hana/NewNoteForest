@@ -168,7 +168,7 @@ export const useNoteStore = create<NoteStoreState>()(
           set({ tags: response.tags, isLoadingTags: false });
         } catch {
           set({ isLoadingTags: false });
-          useSnackbarStore.getState().showError(i18n.t('note.store.loadTagsFailed'));
+          useSnackbarStore.getState().showError(i18n.t('note.store.loadTagsFailed')); 
         }
       },
 
@@ -420,35 +420,6 @@ export const useNoteStore = create<NoteStoreState>()(
         selectedTagIds: state.selectedTagIds,
         isSidebarOpen: state.isSidebarOpen,
       }),
-      onRehydrateStorage: () => async state => {
-        if (!state) return;
-
-        // 복원 후 서버 데이터 다시 로드
-        try {
-          // 노트 목록과 태그 로드
-          await state.loadNotes();
-          await state.loadTags();
-
-          // 활성 탭이 있으면 해당 노트 로드
-          if (state.activeTabId !== null) {
-            await state.loadNoteContent(state.activeTabId);
-
-            // 복원된 content와 서버의 content 비교하여 isDirty 상태 업데이트
-            const restoredContent = state.currentNoteContent;
-            const serverContent = state.currentNote?.content || '';
-
-            if (restoredContent !== serverContent) {
-              // 로컬에 저장된 편집 내용이 서버와 다르면 isDirty로 표시
-              state.tabs = state.tabs.map(tab => (tab.id === state.activeTabId ? { ...tab, isDirty: true } : tab));
-
-              // 복원된 컨텐츠를 유지
-              state.currentNoteContent = restoredContent;
-            }
-          }
-        } catch {
-          // 복원 실패 시 조용히 넘어감
-        }
-      },
     }
   )
 );

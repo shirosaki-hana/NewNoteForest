@@ -71,6 +71,34 @@ export function createAppTheme(mode: 'light' | 'dark') {
           '::selection': {
             backgroundColor: mode === 'light' ? 'rgba(37,99,235,0.2)' : 'rgba(59,130,246,0.25)',
           },
+          // 커스텀 스크롤바 스타일 (WebKit 기반 브라우저: Chrome, Edge, Safari)
+          '*::-webkit-scrollbar': {
+            width: '12px',
+            height: '12px',
+          },
+          '*::-webkit-scrollbar-track': {
+            background: mode === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)',
+            borderRadius: '10px',
+          },
+          '*::-webkit-scrollbar-thumb': {
+            background: mode === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+            borderRadius: '10px',
+            border: mode === 'light' ? '3px solid #f8fafc' : '3px solid #0b1220',
+            transition: 'background 0.2s',
+          },
+          '*::-webkit-scrollbar-thumb:hover': {
+            background: mode === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)',
+          },
+          '*::-webkit-scrollbar-thumb:active': {
+            background: mode === 'light' ? 'rgba(37,99,235,0.4)' : 'rgba(59,130,246,0.4)',
+          },
+          // Firefox용 스크롤바 스타일
+          '*': {
+            scrollbarWidth: 'thin',
+            scrollbarColor: mode === 'light' 
+              ? 'rgba(0,0,0,0.15) rgba(0,0,0,0.03)' 
+              : 'rgba(255,255,255,0.15) rgba(255,255,255,0.03)',
+          },
         },
       },
       MuiButton: {

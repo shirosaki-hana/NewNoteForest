@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -12,7 +13,7 @@ import { Box, alpha, useTheme } from '@mui/material';
 //
 // 기능:
 // - GitHub Flavored Markdown 지원
-// - 코드 하이라이팅 (highlight.js)
+// - 코드 하이라이팅 (highlight.js) - 다크/라이트 모드 자동 전환
 // - 수학 수식 렌더링 (KaTeX)
 // - 따옴표 하이라이팅
 // - Material-UI 테마 연동
@@ -24,6 +25,18 @@ interface MarkdownRendererProps {
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   const theme = useTheme();
+
+  // 테마 모드에 따라 highlight.js CSS를 동적으로 로드
+  useEffect(() => {
+    const isDark = theme.palette.mode === 'dark';
+    
+    // 동적으로 로컬 CSS import
+    if (isDark) {
+      import('highlight.js/styles/github-dark.css');
+    } else {
+      import('highlight.js/styles/github.css');
+    }
+  }, [theme.palette.mode]);
 
   return (
     <Box

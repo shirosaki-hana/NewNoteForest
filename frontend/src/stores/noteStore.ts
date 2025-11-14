@@ -142,7 +142,7 @@ export const useNoteStore = create<NoteStoreState>()(
       loadNotes: async () => {
     set({ isLoadingNotes: true });
     try {
-      const { searchQuery, selectedTagIds, limit, offset } = get();
+      const { searchQuery, selectedTagIds, limit, offset, notes } = get();
       const params = {
         search: searchQuery || undefined,
         tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
@@ -150,7 +150,12 @@ export const useNoteStore = create<NoteStoreState>()(
         offset,
       };
       const response = await noteApi.listNotes(params);
-      set({ notes: response.notes, total: response.total, isLoadingNotes: false });
+      
+      // offset이 0이면 새로 로드 (검색/필터 변경 시)
+      // offset이 0보다 크면 기존 노트에 추가 (무한 스크롤)
+      const newNotes = offset === 0 ? response.notes : [...notes, ...response.notes];
+      
+      set({ notes: newNotes, total: response.total, isLoadingNotes: false });
     } catch {
       set({ isLoadingNotes: false });
       useSnackbarStore.getState().showError(i18n.t('note.store.loadNotesFailed'));

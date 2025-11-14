@@ -1,4 +1,4 @@
-import type { 
+import type {
   CreateNoteRequest,
   CreateNoteResponse,
   UpdateNoteRequest,
@@ -22,7 +22,7 @@ export interface ListNotesParams {
 
 export async function listNotes(params?: ListNotesParams): Promise<ListNotesResponse> {
   const queryParams = new URLSearchParams();
-  
+
   if (params?.search) {
     queryParams.append('search', params.search);
   }
@@ -81,4 +81,3 @@ export async function listTags(): Promise<ListTagsResponse> {
   const response = await apiClient.get<ListTagsResponse>('/notes/tags/all');
   return response.data;
 }
-

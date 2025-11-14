@@ -46,10 +46,10 @@ interface NoteSidebarProps {
 export default function NoteSidebar({ open, onClose, variant = 'permanent' }: NoteSidebarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   const [viewMode, setViewMode] = useState<'notes' | 'tags'>('notes');
   const [searchInput, setSearchInput] = useState('');
-  
+
   const { openSettings } = useSettingsStore();
   const { logout } = useAuthStore();
   const {
@@ -70,7 +70,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
     createNewNote,
     activeTabId,
   } = useNoteStore();
-  
+
   //----------------------------------------------------------------------------//
   // 초기 로드
   //----------------------------------------------------------------------------//
@@ -78,7 +78,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
     loadNotes();
     loadTags();
   }, [loadNotes, loadTags]);
-  
+
   //----------------------------------------------------------------------------//
   // 검색 핸들러
   //----------------------------------------------------------------------------//
@@ -86,12 +86,12 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
     e.preventDefault();
     setSearchQuery(searchInput);
   };
-  
+
   const handleSearchClear = () => {
     setSearchInput('');
     setSearchQuery('');
   };
-  
+
   //----------------------------------------------------------------------------//
   // 태그 필터 토글
   //----------------------------------------------------------------------------//
@@ -102,7 +102,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
       setSelectedTagIds([...selectedTagIds, tagId]);
     }
   };
-  
+
   //----------------------------------------------------------------------------//
   // 노트 선택
   //----------------------------------------------------------------------------//
@@ -112,21 +112,21 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
       onClose();
     }
   };
-  
+
   //----------------------------------------------------------------------------//
   // 더 보기 (페이지네이션)
   //----------------------------------------------------------------------------//
   const handleLoadMore = () => {
     setOffset(offset + 50);
   };
-  
+
   //----------------------------------------------------------------------------//
   // 로그아웃
   //----------------------------------------------------------------------------//
   const handleLogout = async () => {
     await logout();
   };
-  
+
   //----------------------------------------------------------------------------//
   // 사이드바 내용
   //----------------------------------------------------------------------------//
@@ -151,52 +151,48 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
           borderColor: 'divider',
         }}
       >
-        <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+        <Typography variant='h6' component='div' sx={{ fontWeight: 600 }}>
           NoteForest
         </Typography>
         <Box>
-          <IconButton size="small" onClick={createNewNote} color="primary">
+          <IconButton size='small' onClick={createNewNote} color='primary'>
             <AddIcon />
           </IconButton>
           {isMobile && (
-            <IconButton size="small" onClick={onClose}>
+            <IconButton size='small' onClick={onClose}>
               <CloseIcon />
             </IconButton>
           )}
         </Box>
       </Box>
-      
+
       {/* 검색 */}
       <Box sx={{ p: 2 }}>
         <form onSubmit={handleSearchSubmit}>
           <TextField
             fullWidth
-            size="small"
-            placeholder="Search notes..."
+            size='small'
+            placeholder='Search notes...'
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={e => setSearchInput(e.target.value)}
             InputProps={{
               startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
               endAdornment: searchInput && (
-                <IconButton size="small" onClick={handleSearchClear}>
-                  <CloseIcon fontSize="small" />
+                <IconButton size='small' onClick={handleSearchClear}>
+                  <CloseIcon fontSize='small' />
                 </IconButton>
               ),
             }}
           />
         </form>
       </Box>
-      
+
       {/* 탭 (노트 리스트 / 태그) */}
-      <Tabs
-        value={viewMode}
-        onChange={(_, value) => setViewMode(value)}
-        sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}
-      >
-        <Tab label="Notes" value="notes" />
-        <Tab label="Tags" value="tags" />
+      <Tabs value={viewMode} onChange={(_, value) => setViewMode(value)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+        <Tab label='Notes' value='notes' />
+        <Tab label='Tags' value='tags' />
       </Tabs>
-      
+
       {/* 컨텐츠 영역 */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {viewMode === 'notes' ? (
@@ -207,19 +203,12 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selectedTagIds.map(tagId => {
                     const tag = tags.find(t => t.id === tagId);
-                    return tag ? (
-                      <Chip
-                        key={tagId}
-                        label={tag.name}
-                        size="small"
-                        onDelete={() => handleTagToggle(tagId)}
-                      />
-                    ) : null;
+                    return tag ? <Chip key={tagId} label={tag.name} size='small' onDelete={() => handleTagToggle(tagId)} /> : null;
                   })}
                 </Box>
               </Box>
             )}
-            
+
             {/* 노트 리스트 */}
             {isLoadingNotes && notes.length === 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -227,21 +216,16 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
               </Box>
             ) : notes.length === 0 ? (
               <Box sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  {searchQuery || selectedTagIds.length > 0
-                    ? 'No notes found'
-                    : 'No notes yet. Create one!'}
+                <Typography variant='body2' color='text.secondary'>
+                  {searchQuery || selectedTagIds.length > 0 ? 'No notes found' : 'No notes yet. Create one!'}
                 </Typography>
               </Box>
             ) : (
               <>
                 <List sx={{ py: 0 }}>
-                  {notes.map((note) => (
+                  {notes.map(note => (
                     <ListItem key={note.id} disablePadding>
-                      <ListItemButton
-                        selected={activeTabId === note.id}
-                        onClick={() => handleNoteSelect(note.id)}
-                      >
+                      <ListItemButton selected={activeTabId === note.id} onClick={() => handleNoteSelect(note.id)}>
                         <ListItemText
                           primary={note.title || 'Untitled'}
                           secondary={
@@ -251,8 +235,8 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
                                   <Chip
                                     key={tag.id}
                                     label={tag.name}
-                                    size="small"
-                                    variant="outlined"
+                                    size='small'
+                                    variant='outlined'
                                     sx={{ height: 18, fontSize: '0.7rem' }}
                                   />
                                 ))}
@@ -268,17 +252,11 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
                     </ListItem>
                   ))}
                 </List>
-                
+
                 {/* 더 보기 버튼 */}
                 {notes.length < total && (
                   <Box sx={{ p: 2 }}>
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      onClick={handleLoadMore}
-                      disabled={isLoadingNotes}
-                    >
+                    <Button fullWidth variant='outlined' size='small' onClick={handleLoadMore} disabled={isLoadingNotes}>
                       {isLoadingNotes ? 'Loading...' : `Load More (${notes.length}/${total})`}
                     </Button>
                   </Box>
@@ -295,13 +273,13 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
               </Box>
             ) : tags.length === 0 ? (
               <Box sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant='body2' color='text.secondary'>
                   No tags yet
                 </Typography>
               </Box>
             ) : (
               <List>
-                {tags.map((tag) => (
+                {tags.map(tag => (
                   <ListItem key={tag.id} disablePadding>
                     <ListItemButton
                       selected={selectedTagIds.includes(tag.id)}
@@ -320,27 +298,27 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
           </>
         )}
       </Box>
-      
+
       {/* 하단 버튼 */}
       <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
         <List sx={{ py: 0 }}>
           <ListItem disablePadding>
             <ListItemButton onClick={openSettings}>
               <SettingsIcon sx={{ mr: 2 }} />
-              <ListItemText primary="Settings" />
+              <ListItemText primary='Settings' />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton onClick={handleLogout}>
               <LogoutIcon sx={{ mr: 2 }} />
-              <ListItemText primary="Logout" />
+              <ListItemText primary='Logout' />
             </ListItemButton>
           </ListItem>
         </List>
       </Box>
     </Box>
   );
-  
+
   //----------------------------------------------------------------------------//
   // 렌더링
   //----------------------------------------------------------------------------//
@@ -362,4 +340,3 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
     </Drawer>
   );
 }
-

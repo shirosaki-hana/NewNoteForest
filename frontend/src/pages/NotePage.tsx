@@ -13,34 +13,30 @@ import { useNoteStore } from '../stores/noteStore';
 export default function NotePage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useNoteStore();
-  
+
   //----------------------------------------------------------------------------//
   // 사이드바 제어
   //----------------------------------------------------------------------------//
   const handleSidebarToggle = () => {
     toggleSidebar();
   };
-  
+
   const handleSidebarClose = () => {
     if (isMobile) {
       setSidebarOpen(false);
     }
   };
-  
+
   //----------------------------------------------------------------------------//
   // 렌더링
   //----------------------------------------------------------------------------//
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       {/* 사이드바 */}
-      <NoteSidebar
-        open={isSidebarOpen}
-        onClose={handleSidebarClose}
-        variant={isMobile ? 'temporary' : 'permanent'}
-      />
-      
+      <NoteSidebar open={isSidebarOpen} onClose={handleSidebarClose} variant={isMobile ? 'temporary' : 'permanent'} />
+
       {/* 메인 컨텐츠 */}
       <Box
         sx={{
@@ -54,22 +50,21 @@ export default function NotePage() {
       >
         {/* 탭 바 */}
         <NoteTabBar onMenuClick={handleSidebarToggle} />
-        
+
         {/* 에디터 */}
         <Box sx={{ flex: 1, overflow: 'hidden' }}>
           <NoteEditor />
         </Box>
       </Box>
-      
+
       {/* 설정 다이얼로그 */}
       <SettingsDialog />
-      
+
       {/* 공용 확인 다이얼로그 */}
       <ConfirmDialog />
-      
+
       {/* 글로벌 스낵바 */}
       <GlobalSnackbar />
     </Box>
   );
 }
-

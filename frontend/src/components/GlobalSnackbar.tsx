@@ -6,7 +6,7 @@ import { useSnackbarStore } from '../stores/snackbarStore';
 //------------------------------------------------------------------------------//
 export default function GlobalSnackbar() {
   const { isOpen, message, severity, autoHideDuration, closeSnackbar } = useSnackbarStore();
-  
+
   return (
     <Snackbar
       open={isOpen}
@@ -14,15 +14,9 @@ export default function GlobalSnackbar() {
       onClose={closeSnackbar}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
     >
-      <Alert
-        onClose={closeSnackbar}
-        severity={severity}
-        variant="filled"
-        sx={{ width: '100%' }}
-      >
+      <Alert onClose={closeSnackbar} severity={severity} variant='filled' sx={{ width: '100%' }}>
         {message}
       </Alert>
     </Snackbar>
   );
 }
-

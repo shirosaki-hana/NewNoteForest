@@ -11,7 +11,7 @@ interface DialogStoreState {
   cancelText: string;
   onConfirm: (() => void) | null;
   onCancel: (() => void) | null;
-  
+
   // Actions
   openDialog: (options: DialogOptions) => void;
   closeDialog: () => void;
@@ -42,7 +42,7 @@ export const useDialogStore = create<DialogStoreState>((set, get) => ({
   cancelText: 'Cancel',
   onConfirm: null,
   onCancel: null,
-  
+
   //----------------------------------------------------------------------------//
   // 다이얼로그 열기
   //----------------------------------------------------------------------------//
@@ -57,7 +57,7 @@ export const useDialogStore = create<DialogStoreState>((set, get) => ({
       onCancel: options.onCancel || null,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 다이얼로그 닫기
   //----------------------------------------------------------------------------//
@@ -72,7 +72,7 @@ export const useDialogStore = create<DialogStoreState>((set, get) => ({
       onCancel: null,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 확인 핸들러
   //----------------------------------------------------------------------------//
@@ -83,7 +83,7 @@ export const useDialogStore = create<DialogStoreState>((set, get) => ({
     }
     get().closeDialog();
   },
-  
+
   //----------------------------------------------------------------------------//
   // 취소 핸들러
   //----------------------------------------------------------------------------//
@@ -95,4 +95,3 @@ export const useDialogStore = create<DialogStoreState>((set, get) => ({
     get().closeDialog();
   },
 }));
-

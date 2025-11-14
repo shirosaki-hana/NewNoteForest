@@ -13,7 +13,7 @@ interface SnackbarStoreState {
   message: string;
   severity: SnackbarSeverity;
   autoHideDuration: number;
-  
+
   // Actions
   showSnackbar: (message: string, severity?: SnackbarSeverity, duration?: number) => void;
   showSuccess: (message: string) => void;
@@ -26,12 +26,12 @@ interface SnackbarStoreState {
 //------------------------------------------------------------------------------//
 // 스낵바 스토어
 //------------------------------------------------------------------------------//
-export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
+export const useSnackbarStore = create<SnackbarStoreState>(set => ({
   isOpen: false,
   message: '',
   severity: 'info',
   autoHideDuration: 5000,
-  
+
   //----------------------------------------------------------------------------//
   // 스낵바 표시
   //----------------------------------------------------------------------------//
@@ -43,7 +43,7 @@ export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
       autoHideDuration: duration,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 성공 메시지
   //----------------------------------------------------------------------------//
@@ -55,7 +55,7 @@ export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
       autoHideDuration: 3000,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 에러 메시지
   //----------------------------------------------------------------------------//
@@ -67,7 +67,7 @@ export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
       autoHideDuration: 6000,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 경고 메시지
   //----------------------------------------------------------------------------//
@@ -79,7 +79,7 @@ export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
       autoHideDuration: 5000,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 정보 메시지
   //----------------------------------------------------------------------------//
@@ -91,7 +91,7 @@ export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
       autoHideDuration: 4000,
     });
   },
-  
+
   //----------------------------------------------------------------------------//
   // 스낵바 닫기
   //----------------------------------------------------------------------------//
@@ -99,4 +99,3 @@ export const useSnackbarStore = create<SnackbarStoreState>((set) => ({
     set({ isOpen: false });
   },
 }));
-

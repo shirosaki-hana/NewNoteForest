@@ -1,21 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  Box,
-  IconButton,
-  TextField,
-  Chip,
-  Typography,
-  Button,
-  Tooltip,
-  CircularProgress,
-  useTheme,
-} from '@mui/material';
-import {
-  Save as SaveIcon,
-  Delete as DeleteIcon,
-  LocalOffer as TagIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+import { Box, IconButton, TextField, Chip, Typography, Button, Tooltip, CircularProgress, useTheme } from '@mui/material';
+import { Save as SaveIcon, Delete as DeleteIcon, LocalOffer as TagIcon, Add as AddIcon } from '@mui/icons-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { useNoteStore } from '../stores/noteStore';
@@ -31,20 +16,13 @@ export default function NoteEditor() {
   const { mode } = useThemeStore();
   const { openDialog } = useDialogStore();
   const { showError, showSuccess } = useSnackbarStore();
-  const {
-    currentNote,
-    currentNoteContent,
-    isLoadingNote,
-    isSaving,
-    setCurrentNoteContent,
-    saveCurrentNote,
-    deleteCurrentNote,
-  } = useNoteStore();
-  
+  const { currentNote, currentNoteContent, isLoadingNote, isSaving, setCurrentNoteContent, saveCurrentNote, deleteCurrentNote } =
+    useNoteStore();
+
   const [title, setTitle] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
-  
+
   //----------------------------------------------------------------------------//
   // 현재 노트가 변경되면 제목 업데이트
   //----------------------------------------------------------------------------//
@@ -53,13 +31,13 @@ export default function NoteEditor() {
       setTitle(currentNote.title);
     }
   }, [currentNote]);
-  
+
   //----------------------------------------------------------------------------//
   // 제목 저장
   //----------------------------------------------------------------------------//
   const handleTitleBlur = useCallback(async () => {
     if (!currentNote || title === currentNote.title) return;
-    
+
     try {
       const { updateNote } = await import('../api/notes');
       await updateNote(currentNote.id, { title });
@@ -70,21 +48,21 @@ export default function NoteEditor() {
       showError('Failed to update title');
     }
   }, [currentNote, title, showError]);
-  
+
   //----------------------------------------------------------------------------//
   // 태그 추가
   //----------------------------------------------------------------------------//
   const handleAddTag = useCallback(async () => {
     if (!currentNote || !tagInput.trim()) return;
-    
+
     try {
       const { updateNote } = await import('../api/notes');
       const newTagNames = [...currentNote.tags.map(t => t.name), tagInput.trim()];
       await updateNote(currentNote.id, { tagNames: newTagNames });
-      
+
       setTagInput('');
       setShowTagInput(false);
-      
+
       // 노트 리스트 갱신
       const { loadNoteContent, loadNotes, loadTags } = useNoteStore.getState();
       await loadNoteContent(currentNote.id);
@@ -95,44 +73,48 @@ export default function NoteEditor() {
       showError('Failed to add tag');
     }
   }, [currentNote, tagInput, showError, showSuccess]);
-  
+
   //----------------------------------------------------------------------------//
   // 태그 제거
   //----------------------------------------------------------------------------//
-  const handleRemoveTag = useCallback(async (tagName: string) => {
-    if (!currentNote) return;
-    
-    try {
-      const { updateNote } = await import('../api/notes');
-      const newTagNames = currentNote.tags
-        .map(t => t.name)
-        .filter(name => name !== tagName);
-      await updateNote(currentNote.id, { tagNames: newTagNames });
-      
-      // 노트 리스트 갱신
-      const { loadNoteContent, loadNotes, loadTags } = useNoteStore.getState();
-      await loadNoteContent(currentNote.id);
-      loadNotes();
-      loadTags();
-    } catch {
-      showError('Failed to remove tag');
-    }
-  }, [currentNote, showError]);
-  
+  const handleRemoveTag = useCallback(
+    async (tagName: string) => {
+      if (!currentNote) return;
+
+      try {
+        const { updateNote } = await import('../api/notes');
+        const newTagNames = currentNote.tags.map(t => t.name).filter(name => name !== tagName);
+        await updateNote(currentNote.id, { tagNames: newTagNames });
+
+        // 노트 리스트 갱신
+        const { loadNoteContent, loadNotes, loadTags } = useNoteStore.getState();
+        await loadNoteContent(currentNote.id);
+        loadNotes();
+        loadTags();
+      } catch {
+        showError('Failed to remove tag');
+      }
+    },
+    [currentNote, showError]
+  );
+
   //----------------------------------------------------------------------------//
   // 컨텐츠 변경
   //----------------------------------------------------------------------------//
-  const handleContentChange = useCallback((value: string) => {
-    setCurrentNoteContent(value);
-  }, [setCurrentNoteContent]);
-  
+  const handleContentChange = useCallback(
+    (value: string) => {
+      setCurrentNoteContent(value);
+    },
+    [setCurrentNoteContent]
+  );
+
   //----------------------------------------------------------------------------//
   // 저장 핸들러
   //----------------------------------------------------------------------------//
   const handleSave = useCallback(() => {
     saveCurrentNote();
   }, [saveCurrentNote]);
-  
+
   //----------------------------------------------------------------------------//
   // 삭제 핸들러
   //----------------------------------------------------------------------------//
@@ -152,7 +134,7 @@ export default function NoteEditor() {
       },
     });
   }, [deleteCurrentNote, openDialog, showError, showSuccess]);
-  
+
   //----------------------------------------------------------------------------//
   // 키보드 단축키
   //----------------------------------------------------------------------------//
@@ -163,11 +145,11 @@ export default function NoteEditor() {
         handleSave();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave]);
-  
+
   //----------------------------------------------------------------------------//
   // 로딩 중
   //----------------------------------------------------------------------------//
@@ -185,7 +167,7 @@ export default function NoteEditor() {
       </Box>
     );
   }
-  
+
   //----------------------------------------------------------------------------//
   // 노트가 선택되지 않음
   //----------------------------------------------------------------------------//
@@ -201,16 +183,16 @@ export default function NoteEditor() {
           gap: 2,
         }}
       >
-        <Typography variant="h6" color="text.secondary">
+        <Typography variant='h6' color='text.secondary'>
           Select a note to start editing
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant='body2' color='text.secondary'>
           or create a new one from the sidebar
         </Typography>
       </Box>
     );
   }
-  
+
   //----------------------------------------------------------------------------//
   // 에디터 렌더링
   //----------------------------------------------------------------------------//
@@ -237,39 +219,34 @@ export default function NoteEditor() {
         }}
       >
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Tooltip title="Save (Ctrl+S)">
+          <Tooltip title='Save (Ctrl+S)'>
             <span>
-              <IconButton
-                size="small"
-                onClick={handleSave}
-                disabled={isSaving}
-                color="primary"
-              >
+              <IconButton size='small' onClick={handleSave} disabled={isSaving} color='primary'>
                 {isSaving ? <CircularProgress size={20} /> : <SaveIcon />}
               </IconButton>
             </span>
           </Tooltip>
-          
-          <Tooltip title="Delete note">
-            <IconButton size="small" onClick={handleDelete} color="error">
+
+          <Tooltip title='Delete note'>
+            <IconButton size='small' onClick={handleDelete} color='error'>
               <DeleteIcon />
             </IconButton>
           </Tooltip>
         </Box>
-        
-        <Typography variant="caption" color="text.secondary">
+
+        <Typography variant='caption' color='text.secondary'>
           Last updated: {new Date(currentNote.updatedAt).toLocaleString()}
         </Typography>
       </Box>
-      
+
       {/* 제목 */}
       <Box sx={{ px: 3, pt: 2 }}>
         <TextField
           fullWidth
-          variant="standard"
-          placeholder="Note Title"
+          variant='standard'
+          placeholder='Note Title'
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           onBlur={handleTitleBlur}
           InputProps={{
             sx: {
@@ -280,7 +257,7 @@ export default function NoteEditor() {
           }}
         />
       </Box>
-      
+
       {/* 태그 */}
       <Box
         sx={{
@@ -292,24 +269,18 @@ export default function NoteEditor() {
           flexWrap: 'wrap',
         }}
       >
-        {currentNote.tags.map((tag) => (
-          <Chip
-            key={tag.id}
-            label={tag.name}
-            size="small"
-            onDelete={() => handleRemoveTag(tag.name)}
-            icon={<TagIcon />}
-          />
+        {currentNote.tags.map(tag => (
+          <Chip key={tag.id} label={tag.name} size='small' onDelete={() => handleRemoveTag(tag.name)} icon={<TagIcon />} />
         ))}
-        
+
         {showTagInput ? (
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             <TextField
-              size="small"
-              placeholder="Tag name"
+              size='small'
+              placeholder='Tag name'
               value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => {
                 if (e.key === 'Enter') {
                   handleAddTag();
                 } else if (e.key === 'Escape') {
@@ -320,11 +291,11 @@ export default function NoteEditor() {
               autoFocus
               sx={{ width: 120 }}
             />
-            <Button size="small" onClick={handleAddTag}>
+            <Button size='small' onClick={handleAddTag}>
               Add
             </Button>
             <Button
-              size="small"
+              size='small'
               onClick={() => {
                 setShowTagInput(false);
                 setTagInput('');
@@ -334,16 +305,10 @@ export default function NoteEditor() {
             </Button>
           </Box>
         ) : (
-          <Chip
-            label="Add tag"
-            size="small"
-            icon={<AddIcon />}
-            onClick={() => setShowTagInput(true)}
-            variant="outlined"
-          />
+          <Chip label='Add tag' size='small' icon={<AddIcon />} onClick={() => setShowTagInput(true)} variant='outlined' />
         )}
       </Box>
-      
+
       {/* 에디터 */}
       <Box
         sx={{
@@ -394,4 +359,3 @@ export default function NoteEditor() {
     </Box>
   );
 }
-

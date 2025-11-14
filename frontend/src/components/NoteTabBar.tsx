@@ -1,14 +1,5 @@
-import {
-  Box,
-  IconButton,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Menu as MenuIcon,
-  FiberManualRecord as DotIcon,
-} from '@mui/icons-material';
+import { Box, IconButton, Typography, useTheme } from '@mui/material';
+import { Close as CloseIcon, Menu as MenuIcon, FiberManualRecord as DotIcon } from '@mui/icons-material';
 import { useNoteStore } from '../stores/noteStore';
 
 //------------------------------------------------------------------------------//
@@ -24,14 +15,14 @@ interface NoteTabBarProps {
 export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
   const theme = useTheme();
   const { tabs, setActiveTab, closeTab } = useNoteStore();
-  
+
   //----------------------------------------------------------------------------//
   // 탭 클릭 핸들러
   //----------------------------------------------------------------------------//
   const handleTabClick = (tabId: number) => {
     setActiveTab(tabId);
   };
-  
+
   //----------------------------------------------------------------------------//
   // 탭 닫기 핸들러
   //----------------------------------------------------------------------------//
@@ -39,7 +30,7 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
     e.stopPropagation();
     closeTab(tabId);
   };
-  
+
   //----------------------------------------------------------------------------//
   // 렌더링
   //----------------------------------------------------------------------------//
@@ -66,12 +57,12 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
             borderColor: 'divider',
           }}
         >
-          <IconButton size="small" onClick={onMenuClick}>
-            <MenuIcon fontSize="small" />
+          <IconButton size='small' onClick={onMenuClick}>
+            <MenuIcon fontSize='small' />
           </IconButton>
         </Box>
       )}
-      
+
       {/* 탭들 */}
       <Box
         sx={{
@@ -94,12 +85,12 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
               px: 2,
             }}
           >
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               Open a note to start editing
             </Typography>
           </Box>
         ) : (
-          tabs.map((tab) => (
+          tabs.map(tab => (
             <Box
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
@@ -133,10 +124,10 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
                   }}
                 />
               )}
-              
+
               {/* 탭 제목 */}
               <Typography
-                variant="body2"
+                variant='body2'
                 sx={{
                   flex: 1,
                   overflow: 'hidden',
@@ -149,12 +140,12 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
               >
                 {tab.title || 'Untitled'}
               </Typography>
-              
+
               {/* 닫기 버튼 */}
               <IconButton
-                className="close-button"
-                size="small"
-                onClick={(e) => handleCloseTab(e, tab.id)}
+                className='close-button'
+                size='small'
+                onClick={e => handleCloseTab(e, tab.id)}
                 sx={{
                   ml: 0.5,
                   p: 0.5,
@@ -174,4 +165,3 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
     </Box>
   );
 }
-

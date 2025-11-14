@@ -103,6 +103,16 @@ export default {
         openNote: 'Open a note to start editing',
         untitled: 'Untitled',
       },
+      store: {
+        loadNotesFailed: 'Failed to load notes',
+        loadTagsFailed: 'Failed to load tags',
+        loadNoteFailed: 'Failed to load note',
+        noteSaved: 'Note saved successfully',
+        saveNoteFailed: 'Failed to save note',
+        noteCreated: 'Note created successfully',
+        createNoteFailed: 'Failed to create note',
+        deleteNoteFailed: 'Failed to delete note',
+      },
     },
 
     // Errors

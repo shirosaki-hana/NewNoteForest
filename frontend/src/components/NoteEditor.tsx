@@ -34,21 +34,13 @@ export default function NoteEditor() {
       EditorView.theme(
         {
           '&': {
-            backgroundColor: `${theme.palette.background.paper} !important`,
-            color: theme.palette.text.primary,
+            backgroundColor: `${theme.palette.background.default}`,
             height: '100%',
           },
-          '.cm-scroller': {
-            backgroundColor: `${theme.palette.background.paper} !important`,
-            color: theme.palette.text.primary,
-          },
           '.cm-content': {
-            caretColor: theme.palette.primary.main,
-            backgroundColor: `${theme.palette.background.paper} !important`,
-            color: theme.palette.text.primary,
-          },
-          '.cm-line': {
-            color: theme.palette.text.primary,
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
+            fontSize: '15px',
+            lineHeight: '1.6',
           },
           '.cm-cursor, .cm-dropCursor': {
             borderLeftColor: theme.palette.primary.main,
@@ -378,37 +370,6 @@ export default function NoteEditor() {
           onChange={handleContentChange}
           extensions={[markdown(), codeMirrorTheme]}
           theme="none"
-          basicSetup={{
-            lineNumbers: true,
-            highlightActiveLineGutter: true,
-            highlightSpecialChars: true,
-            foldGutter: true,
-            drawSelection: true,
-            dropCursor: true,
-            allowMultipleSelections: true,
-            indentOnInput: true,
-            syntaxHighlighting: true,
-            bracketMatching: true,
-            closeBrackets: true,
-            autocompletion: true,
-            rectangularSelection: true,
-            crosshairCursor: true,
-            highlightActiveLine: true,
-            highlightSelectionMatches: true,
-            closeBracketsKeymap: true,
-            defaultKeymap: true,
-            searchKeymap: true,
-            historyKeymap: true,
-            foldKeymap: true,
-            completionKeymap: true,
-            lintKeymap: true,
-          }}
-          style={{
-            fontSize: '14px',
-            fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: theme.shape.borderRadius,
-          }}
         />
       </Box>
     </Box>

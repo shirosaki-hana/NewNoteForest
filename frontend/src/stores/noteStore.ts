@@ -152,7 +152,7 @@ export const useNoteStore = create<NoteStoreState>()(
       set({ notes: response.notes, total: response.total, isLoadingNotes: false });
     } catch {
       set({ isLoadingNotes: false });
-      useSnackbarStore.getState().showError('Failed to load notes');
+      useSnackbarStore.getState().showError(i18n.t('note.store.loadNotesFailed'));
     }
   },
 
@@ -166,7 +166,7 @@ export const useNoteStore = create<NoteStoreState>()(
       set({ tags: response.tags, isLoadingTags: false });
     } catch {
       set({ isLoadingTags: false });
-      useSnackbarStore.getState().showError('Failed to load tags');
+      useSnackbarStore.getState().showError(i18n.t('note.store.loadTagsFailed'));
     }
   },
 
@@ -209,8 +209,6 @@ export const useNoteStore = create<NoteStoreState>()(
     if (activeTabId !== null) {
       const activeTab = tabs.find(tab => tab.id === activeTabId);
       if (activeTab?.isDirty) {
-        // TODO: 저장 확인 다이얼로그 표시
-        // 지금은 자동 저장
         await get().saveCurrentNote();
       }
     }
@@ -269,8 +267,6 @@ export const useNoteStore = create<NoteStoreState>()(
     if (activeTabId !== null) {
       const activeTab = tabs.find(tab => tab.id === activeTabId);
       if (activeTab?.isDirty) {
-        // TODO: 저장 확인 다이얼로그
-        // 지금은 자동 저장
         get().saveCurrentNote();
       }
     }
@@ -297,7 +293,7 @@ export const useNoteStore = create<NoteStoreState>()(
       });
     } catch {
       set({ isLoadingNote: false });
-      useSnackbarStore.getState().showError('Failed to load note');
+      useSnackbarStore.getState().showError(i18n.t('note.store.loadNoteFailed'));
     }
   },
 
@@ -333,10 +329,10 @@ export const useNoteStore = create<NoteStoreState>()(
       // 노트 리스트 갱신
       get().loadNotes();
 
-      useSnackbarStore.getState().showSuccess('Note saved successfully');
+      useSnackbarStore.getState().showSuccess(i18n.t('note.store.noteSaved'));
     } catch {
       set({ isSaving: false });
-      useSnackbarStore.getState().showError('Failed to save note');
+      useSnackbarStore.getState().showError(i18n.t('note.store.saveNoteFailed'));
     }
   },
 
@@ -357,9 +353,9 @@ export const useNoteStore = create<NoteStoreState>()(
       // 새 노트를 탭에서 열기
       await get().openNoteInTab(response.note.id);
 
-      useSnackbarStore.getState().showSuccess('Note created successfully');
+      useSnackbarStore.getState().showSuccess(i18n.t('note.store.noteCreated'));
     } catch {
-      useSnackbarStore.getState().showError('Failed to create note');
+      useSnackbarStore.getState().showError(i18n.t('note.store.createNoteFailed'));
     }
   },
 
@@ -378,7 +374,7 @@ export const useNoteStore = create<NoteStoreState>()(
       // 노트 리스트 갱신
       get().loadNotes();
     } catch (error) {
-      useSnackbarStore.getState().showError('Failed to delete note');
+      useSnackbarStore.getState().showError(i18n.t('note.store.deleteNoteFailed'));
       throw error; // NoteEditor에서 캐치할 수 있도록 rethrow
     }
   },

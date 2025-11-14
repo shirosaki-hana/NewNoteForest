@@ -102,6 +102,16 @@ export default {
         openNote: '노트를 열어 편집을 시작하세요',
         untitled: '제목 없음',
       },
+      store: {
+        loadNotesFailed: '노트 목록을 불러오는데 실패했습니다',
+        loadTagsFailed: '태그 목록을 불러오는데 실패했습니다',
+        loadNoteFailed: '노트를 불러오는데 실패했습니다',
+        noteSaved: '노트가 저장되었습니다',
+        saveNoteFailed: '노트 저장에 실패했습니다',
+        noteCreated: '노트가 생성되었습니다',
+        createNoteFailed: '노트 생성에 실패했습니다',
+        deleteNoteFailed: '노트 삭제에 실패했습니다',
+      },
     },
 
     // Errors

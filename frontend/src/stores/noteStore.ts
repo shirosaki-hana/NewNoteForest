@@ -14,6 +14,9 @@ export interface NoteTab {
   title: string;
   isDirty: boolean; // 수정되었지만 저장되지 않음
   isActive: boolean;
+  // 각 탭이 자신의 노트 데이터를 보유하여 복원 가능하도록 함
+  note: Note | null;
+  content: string;
 }
 
 //------------------------------------------------------------------------------//
@@ -109,8 +112,9 @@ const forceCloseTab = (tabId: number, set: (partial: Partial<NoteStoreState>) =>
       set({
         tabs: newTabs.map((tab: NoteTab) => ({ ...tab, isActive: tab.id === newActiveTab.id })),
         activeTabId: newActiveTab.id,
+        currentNote: newActiveTab.note,
+        currentNoteContent: newActiveTab.content,
       });
-      get().loadNoteContent(newActiveTab.id);
     } else {
       set({
         tabs: [],
@@ -202,8 +206,9 @@ export const useNoteStore = create<NoteStoreState>()(
           set({
             tabs: tabs.map(tab => ({ ...tab, isActive: tab.id === noteId })),
             activeTabId: noteId,
+            currentNote: existingTab.note,
+            currentNoteContent: existingTab.content,
           });
-          await get().loadNoteContent(noteId);
           return;
         }
 
@@ -215,26 +220,32 @@ export const useNoteStore = create<NoteStoreState>()(
           }
         }
 
-        // 새 탭 추가
-        const note = get().notes.find(n => n.id === noteId);
-        if (!note) {
-          await get().loadNoteContent(noteId);
-          return;
+        // 노트 데이터 로드
+        set({ isLoadingNote: true });
+        try {
+          const response = await noteApi.getNoteById(noteId);
+          const note = response.note;
+
+          const newTab: NoteTab = {
+            id: noteId,
+            title: note.title,
+            isDirty: false,
+            isActive: true,
+            note: note,
+            content: note.content,
+          };
+
+          set({
+            tabs: [...tabs.map(tab => ({ ...tab, isActive: false })), newTab],
+            activeTabId: noteId,
+            currentNote: note,
+            currentNoteContent: note.content,
+            isLoadingNote: false,
+          });
+        } catch {
+          set({ isLoadingNote: false });
+          useSnackbarStore.getState().showError(i18n.t('note.store.loadNoteFailed'));
         }
-
-        const newTab: NoteTab = {
-          id: noteId,
-          title: note.title,
-          isDirty: false,
-          isActive: true,
-        };
-
-        set({
-          tabs: [...tabs.map(tab => ({ ...tab, isActive: false })), newTab],
-          activeTabId: noteId,
-        });
-
-        await get().loadNoteContent(noteId);
       },
 
       closeTab: (tabId: number) => {
@@ -261,24 +272,33 @@ export const useNoteStore = create<NoteStoreState>()(
       },
 
       setActiveTab: (tabId: number) => {
-        const { tabs, activeTabId } = get();
+        const { tabs, activeTabId, currentNoteContent } = get();
 
         if (activeTabId === tabId) return;
 
-        // 현재 활성 탭의 변경사항 확인
+        // 현재 활성 탭의 변경사항을 탭에 저장
         if (activeTabId !== null) {
           const activeTab = tabs.find(tab => tab.id === activeTabId);
           if (activeTab?.isDirty) {
-            get().saveCurrentNote();
+            // 자동 저장하지 않고 탭에 content만 업데이트
+            set({
+              tabs: tabs.map(tab =>
+                tab.id === activeTabId ? { ...tab, content: currentNoteContent } : tab
+              ),
+            });
           }
         }
 
-        set({
-          tabs: tabs.map(tab => ({ ...tab, isActive: tab.id === tabId })),
-          activeTabId: tabId,
-        });
-
-        get().loadNoteContent(tabId);
+        // 새로운 탭 활성화
+        const newActiveTab = tabs.find(tab => tab.id === tabId);
+        if (newActiveTab) {
+          set({
+            tabs: tabs.map(tab => ({ ...tab, isActive: tab.id === tabId })),
+            activeTabId: tabId,
+            currentNote: newActiveTab.note,
+            currentNoteContent: newActiveTab.content,
+          });
+        }
       },
 
       //----------------------------------------------------------------------------//
@@ -303,7 +323,9 @@ export const useNoteStore = create<NoteStoreState>()(
         const { tabs } = get();
         set({
           currentNote: note,
-          tabs: tabs.map(tab => (tab.id === note.id ? { ...tab, title: note.title } : tab)),
+          tabs: tabs.map(tab =>
+            tab.id === note.id ? { ...tab, title: note.title, note: note } : tab
+          ),
         });
       },
 
@@ -315,7 +337,9 @@ export const useNoteStore = create<NoteStoreState>()(
 
         set({
           currentNoteContent: content,
-          tabs: tabs.map(tab => (tab.id === activeTabId ? { ...tab, isDirty } : tab)),
+          tabs: tabs.map(tab =>
+            tab.id === activeTabId ? { ...tab, isDirty, content } : tab
+          ),
         });
       },
 
@@ -332,7 +356,11 @@ export const useNoteStore = create<NoteStoreState>()(
           set({
             currentNote: response.note,
             currentNoteContent: response.note.content,
-            tabs: tabs.map(tab => (tab.id === activeTabId ? { ...tab, isDirty: false } : tab)),
+            tabs: tabs.map(tab =>
+              tab.id === activeTabId
+                ? { ...tab, isDirty: false, note: response.note, content: response.note.content }
+                : tab
+            ),
             isSaving: false,
           });
 
@@ -410,16 +438,47 @@ export const useNoteStore = create<NoteStoreState>()(
     {
       name: 'note-store',
       partialize: state => ({
-        // 편집 중인 탭과 내용 저장
+        // 편집 중인 탭과 내용 저장 (각 탭이 note와 content를 포함)
         tabs: state.tabs,
         activeTabId: state.activeTabId,
-        currentNoteContent: state.currentNoteContent,
 
         // 필터와 UI 상태 저장
         searchQuery: state.searchQuery,
         selectedTagIds: state.selectedTagIds,
         isSidebarOpen: state.isSidebarOpen,
       }),
+      onRehydrateStorage: () => state => {
+        if (!state) return;
+
+        // 복원 시 유효성 검사: note가 null인 탭 제거
+        const validTabs = state.tabs.filter(tab => tab.note !== null);
+        
+        // 유효하지 않은 탭이 있었다면 정리
+        if (validTabs.length !== state.tabs.length) {
+          state.tabs = validTabs;
+          
+          // activeTabId가 유효하지 않은 탭을 가리키면 초기화
+          const activeTabExists = validTabs.some(tab => tab.id === state.activeTabId);
+          if (!activeTabExists) {
+            if (validTabs.length > 0) {
+              const firstTab = validTabs[0];
+              state.activeTabId = firstTab.id;
+              state.tabs = validTabs.map(tab => ({ ...tab, isActive: tab.id === firstTab.id }));
+            } else {
+              state.activeTabId = null;
+            }
+          }
+        }
+
+        // 활성 탭의 노트와 컨텐츠를 currentNote와 currentNoteContent에 복원
+        if (state.activeTabId !== null) {
+          const activeTab = state.tabs.find(tab => tab.id === state.activeTabId);
+          if (activeTab) {
+            state.currentNote = activeTab.note;
+            state.currentNoteContent = activeTab.content;
+          }
+        }
+      },
     }
   )
 );

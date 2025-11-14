@@ -1,6 +1,18 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Element, Text, ElementContent } from 'hast';
 
+/**
+ * Rehype 플러그인: 마크다운 내 따옴표로 감싸진 텍스트를 하이라이팅합니다.
+ * 
+ * 지원하는 따옴표 형식:
+ * - 영문 쌍따옴표: "text"
+ * - 영문 홑따옴표: 'text'
+ * - 한글 쌍따옴표: "text"
+ * - 한글 홑따옴표: 'text'
+ * - 유니코드 쌍따옴표: \u201C...\u201D
+ * - 유니코드 홑따옴표: \u2018...\u2019
+ */
+
 // 따옴표 패턴 - 정규식 인스턴스를 모듈 레벨에서 미리 생성
 const QUOTE_PATTERN =
   /"([^"]+)"|'([^']+)'|"([^"]+)"|'([^']+)'|\u201C([^\u201D]+)\u201D|\u2018([^\u2019]+)\u2019/g;
@@ -50,7 +62,14 @@ export default function rehypeQuoteHighlight() {
       const { node, index, parent } = textNodesToProcess[i];
       const processedParts = processTextNode(node.value);
 
-      if (processedParts.length > 1) {
+      // 처리 결과가 기존 텍스트 노드와 다를 때만 교체
+      // - 따옴표 전체가 하나의 텍스트 노드인 경우처럼,
+      //   하이라이트된 span 하나만 생겨도 교체가 필요하므로
+      if (
+        processedParts.length !== 1 ||
+        processedParts[0].type !== 'text' ||
+        (processedParts[0] as Text).value !== node.value
+      ) {
         // 한 번에 교체 (splice 최적화)
         parent.children.splice(index, 1, ...processedParts);
       }
@@ -114,3 +133,4 @@ function processTextNode(text: string): ElementContent[] {
 
   return parts;
 }
+

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import { Box, IconButton, TextField, Chip, Typography, Button, Tooltip, CircularProgress, useTheme } from '@mui/material';
-import { Save as SaveIcon, Delete as DeleteIcon, LocalOffer as TagIcon, Add as AddIcon } from '@mui/icons-material';
+import { Box, IconButton, TextField, Chip, Typography, Button, Tooltip, CircularProgress, useTheme, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Save as SaveIcon, Delete as DeleteIcon, LocalOffer as TagIcon, Add as AddIcon, Visibility as ViewIcon, Edit as EditIcon } from '@mui/icons-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { EditorView } from '@codemirror/view';
@@ -9,6 +9,7 @@ import { useNoteStore } from '../stores/noteStore';
 import { useDialogStore } from '../stores/dialogStore';
 import { useSnackbarStore } from '../stores/snackbarStore';
 import { updateNote } from '../api/notes';
+import MarkdownRenderer from './MarkdownRenderer';
 
 //------------------------------------------------------------------------------//
 // 노트 에디터 컴포넌트
@@ -25,6 +26,7 @@ export default function NoteEditor() {
   const [tagInput, setTagInput] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
   const [prevNoteId, setPrevNoteId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<'edit' | 'view'>('edit');
 
   //----------------------------------------------------------------------------//
   // CodeMirror 테마 생성 (Material-UI 테마와 연동)
@@ -181,6 +183,18 @@ export default function NoteEditor() {
   }, [deleteCurrentNote, openDialog, showError, showSuccess, t]);
 
   //----------------------------------------------------------------------------//
+  // 보기 모드 전환
+  //----------------------------------------------------------------------------//
+  const handleViewModeChange = useCallback(
+    (_event: React.MouseEvent<HTMLElement>, newMode: 'edit' | 'view' | null) => {
+      if (newMode !== null) {
+        setViewMode(newMode);
+      }
+    },
+    []
+  );
+
+  //----------------------------------------------------------------------------//
   // 키보드 단축키
   //----------------------------------------------------------------------------//
   useEffect(() => {
@@ -277,6 +291,27 @@ export default function NoteEditor() {
               <DeleteIcon />
             </IconButton>
           </Tooltip>
+
+          <Box sx={{ ml: 1, borderLeft: 1, borderColor: 'divider', pl: 1 }}>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewModeChange}
+              size='small'
+              aria-label='view mode'
+            >
+              <ToggleButton value='edit' aria-label='edit mode'>
+                <Tooltip title={t('note.editor.toggleEditMode')}>
+                  <EditIcon fontSize='small' />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value='view' aria-label='view mode'>
+                <Tooltip title={t('note.editor.toggleViewMode')}>
+                  <ViewIcon fontSize='small' />
+                </Tooltip>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         </Box>
 
         <Typography variant='caption' color='text.secondary'>
@@ -356,7 +391,7 @@ export default function NoteEditor() {
         )}
       </Box>
 
-      {/* 에디터 */}
+      {/* 에디터 / 렌더러 */}
       <Box
         sx={{
           flex: 1,
@@ -365,12 +400,16 @@ export default function NoteEditor() {
           pb: 2,
         }}
       >
-        <CodeMirror
-          value={currentNoteContent}
-          onChange={handleContentChange}
-          extensions={[markdown(), codeMirrorTheme]}
-          theme="none"
-        />
+        {viewMode === 'edit' ? (
+          <CodeMirror
+            value={currentNoteContent}
+            onChange={handleContentChange}
+            extensions={[markdown(), codeMirrorTheme, EditorView.lineWrapping]}
+            theme="none"
+          />
+        ) : (
+          <MarkdownRenderer content={currentNoteContent} />
+        )}
       </Box>
     </Box>
   );

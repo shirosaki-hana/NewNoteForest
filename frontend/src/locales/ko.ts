@@ -64,6 +64,10 @@ export default {
         lastUpdated: '마지막 업데이트',
         saveShortcut: '저장 (Ctrl+S)',
         deleteNote: '노트 삭제',
+        viewMode: '읽기 모드',
+        editMode: '편집 모드',
+        toggleViewMode: '읽기 모드로 전환',
+        toggleEditMode: '편집 모드로 전환',
         deleteDialog: {
           title: '노트 삭제',
           message: '이 노트를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',

@@ -65,6 +65,10 @@ export default {
         lastUpdated: 'Last updated',
         saveShortcut: 'Save (Ctrl+S)',
         deleteNote: 'Delete note',
+        viewMode: 'View Mode',
+        editMode: 'Edit Mode',
+        toggleViewMode: 'Switch to view mode',
+        toggleEditMode: 'Switch to edit mode',
         deleteDialog: {
           title: 'Delete Note',
           message: 'Are you sure you want to delete this note? This action cannot be undone.',

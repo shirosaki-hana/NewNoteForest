@@ -44,8 +44,6 @@ export default function NotePage() {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          ml: isMobile ? 0 : isSidebarOpen ? 0 : '-280px',
-          transition: 'margin-left 0.2s',
         }}
       >
         {/* 탭 바 */}

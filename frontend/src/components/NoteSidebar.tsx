@@ -328,11 +328,16 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
       open={open}
       onClose={onClose}
       sx={{
-        width: variant === 'permanent' ? SIDEBAR_WIDTH : undefined,
+        width: variant === 'permanent' ? (open ? SIDEBAR_WIDTH : 0) : undefined,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: SIDEBAR_WIDTH,
+          width: open ? SIDEBAR_WIDTH : 0,
           boxSizing: 'border-box',
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          overflowX: 'hidden',
         },
       }}
     >

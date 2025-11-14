@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
 import NoteSidebar from '../components/NoteSidebar';
 import NoteTabBar from '../components/NoteTabBar';
@@ -15,6 +16,16 @@ export default function NotePage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useNoteStore();
+
+  //----------------------------------------------------------------------------//
+  // 반응형 사이드바 상태 관리
+  //----------------------------------------------------------------------------//
+  useEffect(() => {
+    // 데스크탑 모드로 전환되면 사이드바를 자동으로 열기
+    if (!isMobile && !isSidebarOpen) {
+      setSidebarOpen(true);
+    }
+  }, [isMobile, isSidebarOpen, setSidebarOpen]);
 
   //----------------------------------------------------------------------------//
   // 사이드바 제어

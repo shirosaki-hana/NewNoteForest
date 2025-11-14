@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { useThemeStore } from './stores/themeStore';
+import { useSettingsStore } from './stores/settingsStore';
 import App from './App';
 import { createAppTheme } from './theme/createAppTheme';
 
 export function ThemedApp() {
-  const { effectiveMode } = useThemeStore();
-  const theme = createAppTheme(effectiveMode);
+  const { effectiveTheme } = useSettingsStore();
+  const theme = createAppTheme(effectiveTheme);
 
   // 테마 변경 시 body 배경색도 업데이트
   useEffect(() => {

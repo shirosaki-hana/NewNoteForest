@@ -12,13 +12,11 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, LightMode, DarkMode, SettingsBrightness } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { useSettingsStore } from '../stores/settingsStore';
-import { useThemeStore, type ThemeMode } from '../stores/themeStore';
+import { useSettingsStore, type ThemeMode, type Language } from '../stores/settingsStore';
 
 export default function SettingsDialog() {
-  const { t, i18n } = useTranslation();
-  const { isOpen, closeSettings } = useSettingsStore();
-  const { mode: themeMode, setMode: setThemeMode } = useThemeStore();
+  const { t } = useTranslation();
+  const { isOpen, closeSettings, themeMode, setThemeMode, language, setLanguage } = useSettingsStore();
 
   const handleThemeChange = (_event: React.MouseEvent<HTMLElement>, newMode: ThemeMode | null) => {
     if (newMode !== null) {
@@ -28,8 +26,7 @@ export default function SettingsDialog() {
 
   const handleLanguageChange = (_event: React.MouseEvent<HTMLElement>, newLang: string | null) => {
     if (newLang !== null) {
-      i18n.changeLanguage(newLang);
-      localStorage.setItem('language', newLang);
+      setLanguage(newLang as Language);
     }
   };
 
@@ -93,7 +90,7 @@ export default function SettingsDialog() {
             <Typography variant='subtitle2' gutterBottom sx={{ fontWeight: 600 }}>
               {t('settings.language.title')}
             </Typography>
-            <ToggleButtonGroup value={i18n.language} exclusive onChange={handleLanguageChange} fullWidth size='medium' sx={{ mt: 1.5 }}>
+            <ToggleButtonGroup value={language} exclusive onChange={handleLanguageChange} fullWidth size='medium' sx={{ mt: 1.5 }}>
               <ToggleButton value='ko' aria-label='korean'>
                 {t('settings.language.ko')}
               </ToggleButton>

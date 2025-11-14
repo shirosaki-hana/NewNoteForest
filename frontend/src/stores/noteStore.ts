@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { Note, Tag } from '@noteforest/types';
 import * as noteApi from '../api/notes';
 import { useSnackbarStore } from './snackbarStore';
@@ -129,13 +130,15 @@ const forceCloseTab = (
 //------------------------------------------------------------------------------//
 // 노트 스토어
 //------------------------------------------------------------------------------//
-export const useNoteStore = create<NoteStoreState>((set, get) => ({
-  ...initialState,
+export const useNoteStore = create<NoteStoreState>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
 
-  //----------------------------------------------------------------------------//
-  // 노트 목록 로드
-  //----------------------------------------------------------------------------//
-  loadNotes: async () => {
+      //----------------------------------------------------------------------------//
+      // 노트 목록 로드
+      //----------------------------------------------------------------------------//
+      loadNotes: async () => {
     set({ isLoadingNotes: true });
     try {
       const { searchQuery, selectedTagIds, limit, offset } = get();
@@ -397,4 +400,53 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
   reset: () => {
     set(initialState);
   },
-}));
+    }),
+    {
+      name: 'note-store',
+      partialize: state => ({
+        // 편집 중인 탭과 내용 저장
+        tabs: state.tabs,
+        activeTabId: state.activeTabId,
+        currentNoteContent: state.currentNoteContent,
+        
+        // 필터와 UI 상태 저장
+        searchQuery: state.searchQuery,
+        selectedTagIds: state.selectedTagIds,
+        isSidebarOpen: state.isSidebarOpen,
+      }),
+      onRehydrateStorage: () => async state => {
+        if (!state) return;
+
+        // 복원 후 서버 데이터 다시 로드
+        try {
+          // 노트 목록과 태그 로드
+          await state.loadNotes();
+          await state.loadTags();
+
+          // 활성 탭이 있으면 해당 노트 로드
+          if (state.activeTabId !== null) {
+            await state.loadNoteContent(state.activeTabId);
+            
+            // 복원된 content와 서버의 content 비교하여 isDirty 상태 업데이트
+            const restoredContent = state.currentNoteContent;
+            const serverContent = state.currentNote?.content || '';
+            
+            if (restoredContent !== serverContent) {
+              // 로컬에 저장된 편집 내용이 서버와 다르면 isDirty로 표시
+              state.tabs = state.tabs.map(tab =>
+                tab.id === state.activeTabId
+                  ? { ...tab, isDirty: true }
+                  : tab
+              );
+              
+              // 복원된 컨텐츠를 유지
+              state.currentNoteContent = restoredContent;
+            }
+          }
+        } catch {
+          // 복원 실패 시 조용히 넘어감
+        }
+      },
+    }
+  )
+);

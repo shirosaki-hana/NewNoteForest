@@ -8,14 +8,14 @@ export type Language = 'ko' | 'en';
 interface SettingsState {
   // UI 상태
   isOpen: boolean;
-  
+
   // 테마 설정
   themeMode: ThemeMode;
   effectiveTheme: 'light' | 'dark'; // 실제 적용되는 테마 (system 모드 시 OS 설정 반영)
-  
+
   // 언어 설정
   language: Language;
-  
+
   // Actions
   openSettings: () => void;
   closeSettings: () => void;
@@ -51,7 +51,7 @@ const getInitialLanguage = (): Language => {
   if (oldLanguage && ['ko', 'en'].includes(oldLanguage)) {
     return oldLanguage as Language;
   }
-  
+
   // 브라우저 언어 감지
   const browserLang = navigator.language.split('-')[0];
   return ['ko', 'en'].includes(browserLang) ? (browserLang as Language) : 'en';
@@ -113,16 +113,16 @@ export const useSettingsStore = create<SettingsState>()(
 
         // 기존 localStorage에서 마이그레이션 (persist에 저장된 값이 없는 경우에만)
         const persistedSettings = localStorage.getItem('settings');
-        
+
         if (!persistedSettings) {
           // persist된 데이터가 없으면 기존 localStorage에서 가져오기
           const migratedTheme = getInitialTheme();
           const migratedLanguage = getInitialLanguage();
-          
+
           state.themeMode = migratedTheme;
           state.effectiveTheme = calculateEffectiveTheme(migratedTheme);
           state.language = migratedLanguage;
-          
+
           // 기존 localStorage 키 정리
           localStorage.removeItem('theme');
           localStorage.removeItem('language');
@@ -130,7 +130,7 @@ export const useSettingsStore = create<SettingsState>()(
           // persist된 데이터가 있으면 effectiveTheme만 재계산
           state.effectiveTheme = calculateEffectiveTheme(state.themeMode);
         }
-        
+
         // i18n 동기화
         i18n.changeLanguage(state.language);
       },

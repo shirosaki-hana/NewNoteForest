@@ -1,17 +1,7 @@
 import { database } from '../database/index.js';
-import { 
-  CreateNoteRequestSchema, 
-  UpdateNoteRequestSchema, 
-  ListNotesQuerySchema,
-} from '@noteforest/types';
+import { CreateNoteRequestSchema, UpdateNoteRequestSchema, ListNotesQuerySchema } from '@noteforest/types';
 
-import type { 
-  CreateNoteRequest, 
-  UpdateNoteRequest, 
-  ListNotesQuery, 
-  Note, 
-  Tag,
-} from '@noteforest/types';
+import type { CreateNoteRequest, UpdateNoteRequest, ListNotesQuery, Note, Tag } from '@noteforest/types';
 import type { Note as PrismaNote, Tag as PrismaTag, NoteTag as PrismaNoteTag, Prisma } from '../database/prismaclient/index.js';
 
 //------------------------------------------------------------------------------//

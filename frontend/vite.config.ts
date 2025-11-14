@@ -20,11 +20,18 @@ export default defineConfig({
       output: {
         manualChunks: id => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('axios') || id.includes('zustand') || id.includes('zod') || id.includes('@mui')) {
+            if (
+              id.includes('react') ||
+              id.includes('react-dom') ||
+              id.includes('axios') ||
+              id.includes('zustand') ||
+              id.includes('zod') ||
+              id.includes('@mui')
+            ) {
               return 'vendor';
             }
             if (id.includes('codemirror')) {
-              return 'editor'; 
+              return 'editor';
             }
           }
         },

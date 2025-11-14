@@ -9,14 +9,7 @@ import {
   ListNotesResponseSchema,
   ListTagsResponseSchema,
 } from '@noteforest/types';
-import { 
-  createNote, 
-  getNoteById, 
-  updateNote, 
-  deleteNote, 
-  listNotes, 
-  listTags,
-} from '../services/index.js';
+import { createNote, getNoteById, updateNote, deleteNote, listNotes, listTags } from '../services/index.js';
 import { requireAuth } from '../middleware/index.js';
 //------------------------------------------------------------------------------//
 

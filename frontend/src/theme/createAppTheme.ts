@@ -95,9 +95,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
           // Firefox용 스크롤바 스타일
           '*': {
             scrollbarWidth: 'thin',
-            scrollbarColor: mode === 'light' 
-              ? 'rgba(0,0,0,0.15) rgba(0,0,0,0.03)' 
-              : 'rgba(255,255,255,0.15) rgba(255,255,255,0.03)',
+            scrollbarColor: mode === 'light' ? 'rgba(0,0,0,0.15) rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.15) rgba(255,255,255,0.03)',
           },
         },
       },

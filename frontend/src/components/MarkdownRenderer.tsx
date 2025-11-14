@@ -9,7 +9,7 @@ import { Box, alpha, useTheme } from '@mui/material';
 
 //------------------------------------------------------------------------------//
 // 마크다운 렌더러 컴포넌트
-// 
+//
 // 기능:
 // - GitHub Flavored Markdown 지원
 // - 코드 하이라이팅 (highlight.js)
@@ -36,7 +36,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         color: 'text.primary',
         overflow: 'auto',
         height: '100%',
-        
+
         // 따옴표 하이라이팅
         '& .quote-highlight': {
           color: 'info.main',
@@ -179,16 +179,10 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[
-          rehypeHighlight,
-          [rehypeKatex, { output: 'mathml' }],
-          rehypeRaw,
-          rehypeQuoteHighlight,
-        ]}
+        rehypePlugins={[rehypeHighlight, [rehypeKatex, { output: 'mathml' }], rehypeRaw, rehypeQuoteHighlight]}
       >
         {content || ''}
       </ReactMarkdown>
     </Box>
   );
 }
-

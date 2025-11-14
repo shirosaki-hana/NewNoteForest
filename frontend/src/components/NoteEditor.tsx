@@ -1,6 +1,25 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import { Box, IconButton, TextField, Chip, Typography, Button, Tooltip, CircularProgress, useTheme, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { Save as SaveIcon, Delete as DeleteIcon, LocalOffer as TagIcon, Add as AddIcon, Visibility as ViewIcon, Edit as EditIcon } from '@mui/icons-material';
+import {
+  Box,
+  IconButton,
+  TextField,
+  Chip,
+  Typography,
+  Button,
+  Tooltip,
+  CircularProgress,
+  useTheme,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
+import {
+  Save as SaveIcon,
+  Delete as DeleteIcon,
+  LocalOffer as TagIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+} from '@mui/icons-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { EditorView } from '@codemirror/view';
@@ -185,14 +204,11 @@ export default function NoteEditor() {
   //----------------------------------------------------------------------------//
   // 보기 모드 전환
   //----------------------------------------------------------------------------//
-  const handleViewModeChange = useCallback(
-    (_event: React.MouseEvent<HTMLElement>, newMode: 'edit' | 'view' | null) => {
-      if (newMode !== null) {
-        setViewMode(newMode);
-      }
-    },
-    []
-  );
+  const handleViewModeChange = useCallback((_event: React.MouseEvent<HTMLElement>, newMode: 'edit' | 'view' | null) => {
+    if (newMode !== null) {
+      setViewMode(newMode);
+    }
+  }, []);
 
   //----------------------------------------------------------------------------//
   // 키보드 단축키
@@ -293,13 +309,7 @@ export default function NoteEditor() {
           </Tooltip>
 
           <Box sx={{ ml: 1, borderLeft: 1, borderColor: 'divider', pl: 1 }}>
-            <ToggleButtonGroup
-              value={viewMode}
-              exclusive
-              onChange={handleViewModeChange}
-              size='small'
-              aria-label='view mode'
-            >
+            <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small' aria-label='view mode'>
               <ToggleButton value='edit' aria-label='edit mode'>
                 <Tooltip title={t('note.editor.toggleEditMode')}>
                   <EditIcon fontSize='small' />
@@ -405,7 +415,7 @@ export default function NoteEditor() {
             value={currentNoteContent}
             onChange={handleContentChange}
             extensions={[markdown(), codeMirrorTheme, EditorView.lineWrapping]}
-            theme="none"
+            theme='none'
           />
         ) : (
           <MarkdownRenderer content={currentNoteContent} />

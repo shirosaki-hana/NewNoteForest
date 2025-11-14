@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import type { Note, Tag } from '@noteforest/types';
 import * as noteApi from '../api/notes';
 import { useSnackbarStore } from './snackbarStore';
+import { useDialogStore } from './dialogStore';
+import i18n from '../i18n';
 
 //------------------------------------------------------------------------------//
 // 탭 인터페이스
@@ -89,6 +91,39 @@ const initialState = {
   isLoadingNote: false,
   isSaving: false,
   isSidebarOpen: true,
+};
+
+//------------------------------------------------------------------------------//
+// 헬퍼 함수: 탭 강제 닫기 (확인 다이얼로그 없이)
+//------------------------------------------------------------------------------//
+const forceCloseTab = (
+  tabId: number,
+  set: (partial: Partial<NoteStoreState>) => void,
+  get: () => NoteStoreState
+) => {
+  const { tabs, activeTabId } = get();
+  const newTabs = tabs.filter((tab: NoteTab) => tab.id !== tabId);
+
+  // 닫는 탭이 활성 탭이면 다른 탭을 활성화
+  if (activeTabId === tabId) {
+    if (newTabs.length > 0) {
+      const newActiveTab = newTabs[newTabs.length - 1];
+      set({
+        tabs: newTabs.map((tab: NoteTab) => ({ ...tab, isActive: tab.id === newActiveTab.id })),
+        activeTabId: newActiveTab.id,
+      });
+      get().loadNoteContent(newActiveTab.id);
+    } else {
+      set({
+        tabs: [],
+        activeTabId: null,
+        currentNote: null,
+        currentNoteContent: '',
+      });
+    }
+  } else {
+    set({ tabs: newTabs });
+  }
 };
 
 //------------------------------------------------------------------------------//
@@ -200,36 +235,26 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
   },
 
   closeTab: (tabId: number) => {
-    const { tabs, activeTabId } = get();
+    const { tabs } = get();
     const closingTab = tabs.find(tab => tab.id === tabId);
 
+    // 저장되지 않은 변경사항이 있는 경우 확인 다이얼로그 표시
     if (closingTab?.isDirty) {
-      // TODO: 저장 확인 다이얼로그
-      // 지금은 그냥 닫음
+      useDialogStore.getState().openDialog({
+        title: i18n.t('note.unsavedChanges.title'),
+        message: i18n.t('note.unsavedChanges.message'),
+        confirmText: i18n.t('note.unsavedChanges.confirm'),
+        cancelText: i18n.t('note.unsavedChanges.cancel'),
+        onConfirm: () => {
+          // 확인 시 강제로 탭 닫기
+          forceCloseTab(tabId, set, get);
+        },
+      });
+      return;
     }
 
-    const newTabs = tabs.filter(tab => tab.id !== tabId);
-
-    // 닫는 탭이 활성 탭이면 다른 탭을 활성화
-    if (activeTabId === tabId) {
-      if (newTabs.length > 0) {
-        const newActiveTab = newTabs[newTabs.length - 1];
-        set({
-          tabs: newTabs.map(tab => ({ ...tab, isActive: tab.id === newActiveTab.id })),
-          activeTabId: newActiveTab.id,
-        });
-        get().loadNoteContent(newActiveTab.id);
-      } else {
-        set({
-          tabs: [],
-          activeTabId: null,
-          currentNote: null,
-          currentNoteContent: '',
-        });
-      }
-    } else {
-      set({ tabs: newTabs });
-    }
+    // 저장된 상태면 바로 닫기
+    forceCloseTab(tabId, set, get);
   },
 
   setActiveTab: (tabId: number) => {

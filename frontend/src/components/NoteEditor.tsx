@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Box, IconButton, TextField, Chip, Typography, Button, Tooltip, CircularProgress, useTheme } from '@mui/material';
 import { Save as SaveIcon, Delete as DeleteIcon, LocalOffer as TagIcon, Add as AddIcon } from '@mui/icons-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
+import { EditorView } from '@codemirror/view';
+import { useTranslation } from 'react-i18next';
 import { useNoteStore } from '../stores/noteStore';
-import { useThemeStore } from '../stores/themeStore';
 import { useDialogStore } from '../stores/dialogStore';
 import { useSnackbarStore } from '../stores/snackbarStore';
 import { updateNote } from '../api/notes';
@@ -13,8 +14,8 @@ import { updateNote } from '../api/notes';
 // 노트 에디터 컴포넌트
 //------------------------------------------------------------------------------//
 export default function NoteEditor() {
+  const { t } = useTranslation();
   const theme = useTheme();
-  const { mode } = useThemeStore();
   const { openDialog } = useDialogStore();
   const { showError, showSuccess } = useSnackbarStore();
   const { currentNote, currentNoteContent, isLoadingNote, isSaving, setCurrentNoteContent, saveCurrentNote, deleteCurrentNote } =
@@ -24,6 +25,56 @@ export default function NoteEditor() {
   const [tagInput, setTagInput] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
   const [prevNoteId, setPrevNoteId] = useState<number | null>(null);
+
+  //----------------------------------------------------------------------------//
+  // CodeMirror 테마 생성 (Material-UI 테마와 연동)
+  //----------------------------------------------------------------------------//
+  const codeMirrorTheme = useMemo(
+    () =>
+      EditorView.theme(
+        {
+          '&': {
+            backgroundColor: `${theme.palette.background.paper} !important`,
+            color: theme.palette.text.primary,
+            height: '100%',
+          },
+          '.cm-scroller': {
+            backgroundColor: `${theme.palette.background.paper} !important`,
+            color: theme.palette.text.primary,
+          },
+          '.cm-content': {
+            caretColor: theme.palette.primary.main,
+            backgroundColor: `${theme.palette.background.paper} !important`,
+            color: theme.palette.text.primary,
+          },
+          '.cm-line': {
+            color: theme.palette.text.primary,
+          },
+          '.cm-cursor, .cm-dropCursor': {
+            borderLeftColor: theme.palette.primary.main,
+          },
+          '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(144, 202, 249, 0.16)' : 'rgba(25, 118, 210, 0.12)',
+          },
+          '.cm-activeLine': {
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+          },
+          '.cm-gutters': {
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.secondary,
+            border: 'none',
+          },
+          '.cm-activeLineGutter': {
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+          },
+          '.cm-lineNumbers .cm-gutterElement': {
+            color: theme.palette.text.disabled,
+          },
+        },
+        { dark: theme.palette.mode === 'dark' }
+      ),
+    [theme]
+  );
 
   //----------------------------------------------------------------------------//
   // 현재 노트가 변경되면 제목 업데이트
@@ -49,9 +100,9 @@ export default function NoteEditor() {
       const { loadNotes } = useNoteStore.getState();
       loadNotes();
     } catch {
-      showError('Failed to update title');
+      showError(t('note.editor.messages.titleUpdateFailed'));
     }
-  }, [currentNote, title, showError]);
+  }, [currentNote, title, showError, t]);
 
   //----------------------------------------------------------------------------//
   // 태그 추가
@@ -71,11 +122,11 @@ export default function NoteEditor() {
       await loadNoteContent(currentNote.id);
       loadNotes();
       loadTags();
-      showSuccess('Tag added successfully');
+      showSuccess(t('note.editor.messages.tagAdded'));
     } catch {
-      showError('Failed to add tag');
+      showError(t('note.editor.messages.tagAddFailed'));
     }
-  }, [currentNote, tagInput, showError, showSuccess]);
+  }, [currentNote, tagInput, showError, showSuccess, t]);
 
   //----------------------------------------------------------------------------//
   // 태그 제거
@@ -94,10 +145,10 @@ export default function NoteEditor() {
         loadNotes();
         loadTags();
       } catch {
-        showError('Failed to remove tag');
+        showError(t('note.editor.messages.tagRemoveFailed'));
       }
     },
-    [currentNote, showError]
+    [currentNote, showError, t]
   );
 
   //----------------------------------------------------------------------------//
@@ -122,20 +173,20 @@ export default function NoteEditor() {
   //----------------------------------------------------------------------------//
   const handleDelete = useCallback(() => {
     openDialog({
-      title: 'Delete Note',
-      message: 'Are you sure you want to delete this note? This action cannot be undone.',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      title: t('note.editor.deleteDialog.title'),
+      message: t('note.editor.deleteDialog.message'),
+      confirmText: t('note.editor.deleteDialog.confirm'),
+      cancelText: t('note.editor.deleteDialog.cancel'),
       onConfirm: async () => {
         try {
           await deleteCurrentNote();
-          showSuccess('Note deleted successfully');
+          showSuccess(t('note.editor.messages.noteDeleted'));
         } catch {
-          showError('Failed to delete note');
+          showError(t('note.editor.messages.noteDeleteFailed'));
         }
       },
     });
-  }, [deleteCurrentNote, openDialog, showError, showSuccess]);
+  }, [deleteCurrentNote, openDialog, showError, showSuccess, t]);
 
   //----------------------------------------------------------------------------//
   // 키보드 단축키
@@ -186,10 +237,10 @@ export default function NoteEditor() {
         }}
       >
         <Typography variant='h6' color='text.secondary'>
-          Select a note to start editing
+          {t('note.editor.selectNote')}
         </Typography>
         <Typography variant='body2' color='text.secondary'>
-          or create a new one from the sidebar
+          {t('note.editor.createNewNote')}
         </Typography>
       </Box>
     );
@@ -221,7 +272,7 @@ export default function NoteEditor() {
         }}
       >
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Tooltip title='Save (Ctrl+S)'>
+          <Tooltip title={t('note.editor.saveShortcut')}>
             <span>
               <IconButton size='small' onClick={handleSave} disabled={isSaving} color='primary'>
                 {isSaving ? <CircularProgress size={20} /> : <SaveIcon />}
@@ -229,7 +280,7 @@ export default function NoteEditor() {
             </span>
           </Tooltip>
 
-          <Tooltip title='Delete note'>
+          <Tooltip title={t('note.editor.deleteNote')}>
             <IconButton size='small' onClick={handleDelete} color='error'>
               <DeleteIcon />
             </IconButton>
@@ -237,7 +288,7 @@ export default function NoteEditor() {
         </Box>
 
         <Typography variant='caption' color='text.secondary'>
-          Last updated: {new Date(currentNote.updatedAt).toLocaleString()}
+          {t('note.editor.lastUpdated')}: {new Date(currentNote.updatedAt).toLocaleString()}
         </Typography>
       </Box>
 
@@ -246,16 +297,18 @@ export default function NoteEditor() {
         <TextField
           fullWidth
           variant='standard'
-          placeholder='Note Title'
+          placeholder={t('note.editor.noteTitle')}
           value={title}
           onChange={e => setTitle(e.target.value)}
           onBlur={handleTitleBlur}
-          InputProps={{
-            sx: {
-              fontSize: '1.5rem',
-              fontWeight: 600,
+          slotProps={{
+            input: {
+              sx: {
+                fontSize: '1.5rem',
+                fontWeight: 600,
+              },
+              disableUnderline: true,
             },
-            disableUnderline: true,
           }}
         />
       </Box>
@@ -279,7 +332,7 @@ export default function NoteEditor() {
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             <TextField
               size='small'
-              placeholder='Tag name'
+              placeholder={t('note.editor.tag.tagName')}
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               onKeyDown={e => {
@@ -294,7 +347,7 @@ export default function NoteEditor() {
               sx={{ width: 120 }}
             />
             <Button size='small' onClick={handleAddTag}>
-              Add
+              {t('note.editor.tag.addButton')}
             </Button>
             <Button
               size='small'
@@ -303,11 +356,11 @@ export default function NoteEditor() {
                 setTagInput('');
               }}
             >
-              Cancel
+              {t('note.editor.tag.cancelButton')}
             </Button>
           </Box>
         ) : (
-          <Chip label='Add tag' size='small' icon={<AddIcon />} onClick={() => setShowTagInput(true)} variant='outlined' />
+          <Chip label={t('note.editor.tag.add')} size='small' icon={<AddIcon />} onClick={() => setShowTagInput(true)} variant='outlined' />
         )}
       </Box>
 
@@ -323,8 +376,8 @@ export default function NoteEditor() {
         <CodeMirror
           value={currentNoteContent}
           onChange={handleContentChange}
-          extensions={[markdown()]}
-          theme={mode === 'dark' ? 'dark' : 'light'}
+          extensions={[markdown(), codeMirrorTheme]}
+          theme="none"
           basicSetup={{
             lineNumbers: true,
             highlightActiveLineGutter: true,

@@ -25,6 +25,7 @@ import {
   Logout as LogoutIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useNoteStore } from '../stores/noteStore';
 import { useAuthStore } from '../stores/authStore';
 import { useSettingsStore } from '../stores/settingsStore';
@@ -44,6 +45,7 @@ interface NoteSidebarProps {
 // 노트 사이드바 컴포넌트
 //------------------------------------------------------------------------------//
 export default function NoteSidebar({ open, onClose, variant = 'permanent' }: NoteSidebarProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -172,7 +174,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
           <TextField
             fullWidth
             size='small'
-            placeholder='Search notes...'
+            placeholder={t('note.sidebar.searchPlaceholder')}
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             InputProps={{
@@ -189,8 +191,8 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
 
       {/* 탭 (노트 리스트 / 태그) */}
       <Tabs value={viewMode} onChange={(_, value) => setViewMode(value)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
-        <Tab label='Notes' value='notes' />
-        <Tab label='Tags' value='tags' />
+        <Tab label={t('note.sidebar.notesTab')} value='notes' />
+        <Tab label={t('note.sidebar.tagsTab')} value='tags' />
       </Tabs>
 
       {/* 컨텐츠 영역 */}
@@ -217,7 +219,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
             ) : notes.length === 0 ? (
               <Box sx={{ p: 4, textAlign: 'center' }}>
                 <Typography variant='body2' color='text.secondary'>
-                  {searchQuery || selectedTagIds.length > 0 ? 'No notes found' : 'No notes yet. Create one!'}
+                  {searchQuery || selectedTagIds.length > 0 ? t('note.sidebar.noNotesFound') : t('note.sidebar.noNotesYet')}
                 </Typography>
               </Box>
             ) : (
@@ -227,7 +229,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
                     <ListItem key={note.id} disablePadding>
                       <ListItemButton selected={activeTabId === note.id} onClick={() => handleNoteSelect(note.id)}>
                         <ListItemText
-                          primary={note.title || 'Untitled'}
+                          primary={note.title || t('note.sidebar.untitled')}
                           secondary={
                             note.tags.length > 0 && (
                               <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
@@ -257,7 +259,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
                 {notes.length < total && (
                   <Box sx={{ p: 2 }}>
                     <Button fullWidth variant='outlined' size='small' onClick={handleLoadMore} disabled={isLoadingNotes}>
-                      {isLoadingNotes ? 'Loading...' : `Load More (${notes.length}/${total})`}
+                      {isLoadingNotes ? t('note.sidebar.loading') : t('note.sidebar.loadMore', { current: notes.length, total })}
                     </Button>
                   </Box>
                 )}
@@ -274,7 +276,7 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
             ) : tags.length === 0 ? (
               <Box sx={{ p: 4, textAlign: 'center' }}>
                 <Typography variant='body2' color='text.secondary'>
-                  No tags yet
+                  {t('note.sidebar.noTagsYet')}
                 </Typography>
               </Box>
             ) : (
@@ -305,13 +307,13 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
           <ListItem disablePadding>
             <ListItemButton onClick={openSettings}>
               <SettingsIcon sx={{ mr: 2 }} />
-              <ListItemText primary='Settings' />
+              <ListItemText primary={t('note.sidebar.settings')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton onClick={handleLogout}>
               <LogoutIcon sx={{ mr: 2 }} />
-              <ListItemText primary='Logout' />
+              <ListItemText primary={t('note.sidebar.logout')} />
             </ListItemButton>
           </ListItem>
         </List>

@@ -50,6 +50,61 @@ export default {
       },
     },
 
+    // Note
+    note: {
+      unsavedChanges: {
+        title: 'Unsaved Changes',
+        message: 'You have unsaved changes. Do you really want to close this note?',
+        confirm: 'Close',
+        cancel: 'Cancel',
+      },
+      editor: {
+        selectNote: 'Select a note to start editing',
+        createNewNote: 'or create a new one from the sidebar',
+        noteTitle: 'Note Title',
+        lastUpdated: 'Last updated',
+        saveShortcut: 'Save (Ctrl+S)',
+        deleteNote: 'Delete note',
+        deleteDialog: {
+          title: 'Delete Note',
+          message: 'Are you sure you want to delete this note? This action cannot be undone.',
+          confirm: 'Delete',
+          cancel: 'Cancel',
+        },
+        tag: {
+          add: 'Add tag',
+          tagName: 'Tag name',
+          addButton: 'Add',
+          cancelButton: 'Cancel',
+        },
+        messages: {
+          titleUpdateFailed: 'Failed to update title',
+          tagAdded: 'Tag added successfully',
+          tagAddFailed: 'Failed to add tag',
+          tagRemoveFailed: 'Failed to remove tag',
+          noteDeleted: 'Note deleted successfully',
+          noteDeleteFailed: 'Failed to delete note',
+        },
+      },
+      sidebar: {
+        searchPlaceholder: 'Search notes...',
+        notesTab: 'Notes',
+        tagsTab: 'Tags',
+        untitled: 'Untitled',
+        noNotesFound: 'No notes found',
+        noNotesYet: 'No notes yet. Create one!',
+        noTagsYet: 'No tags yet',
+        loading: 'Loading...',
+        loadMore: 'Load More ({{current}}/{{total}})',
+        settings: 'Settings',
+        logout: 'Logout',
+      },
+      tabBar: {
+        openNote: 'Open a note to start editing',
+        untitled: 'Untitled',
+      },
+    },
+
     // Errors
     errors: {
       statusCheckFailed: 'Failed to check status',

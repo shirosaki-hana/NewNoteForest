@@ -49,6 +49,61 @@ export default {
         en: 'English',
       },
     },
+    // Note
+    note: {
+      unsavedChanges: {
+        title: '저장되지 않은 변경사항',
+        message: '저장하지 않은 변경사항이 있습니다. 정말로 닫으시겠습니까?',
+        confirm: '닫기',
+        cancel: '취소',
+      },
+      editor: {
+        selectNote: '편집할 노트를 선택하세요',
+        createNewNote: '또는 사이드바에서 새 노트를 만드세요',
+        noteTitle: '노트 제목',
+        lastUpdated: '마지막 업데이트',
+        saveShortcut: '저장 (Ctrl+S)',
+        deleteNote: '노트 삭제',
+        deleteDialog: {
+          title: '노트 삭제',
+          message: '이 노트를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',
+          confirm: '삭제',
+          cancel: '취소',
+        },
+        tag: {
+          add: '태그 추가',
+          tagName: '태그 이름',
+          addButton: '추가',
+          cancelButton: '취소',
+        },
+        messages: {
+          titleUpdateFailed: '제목 업데이트에 실패했습니다',
+          tagAdded: '태그가 추가되었습니다',
+          tagAddFailed: '태그 추가에 실패했습니다',
+          tagRemoveFailed: '태그 제거에 실패했습니다',
+          noteDeleted: '노트가 삭제되었습니다',
+          noteDeleteFailed: '노트 삭제에 실패했습니다',
+        },
+      },
+      sidebar: {
+        searchPlaceholder: '노트 검색...',
+        notesTab: '노트',
+        tagsTab: '태그',
+        untitled: '제목 없음',
+        noNotesFound: '노트를 찾을 수 없습니다',
+        noNotesYet: '아직 노트가 없습니다. 하나 만들어보세요!',
+        noTagsYet: '아직 태그가 없습니다',
+        loading: '로딩 중...',
+        loadMore: '더 보기 ({{current}}/{{total}})',
+        settings: '설정',
+        logout: '로그아웃',
+      },
+      tabBar: {
+        openNote: '노트를 열어 편집을 시작하세요',
+        untitled: '제목 없음',
+      },
+    },
+
     // Errors
     errors: {
       statusCheckFailed: '상태 확인에 실패했습니다',

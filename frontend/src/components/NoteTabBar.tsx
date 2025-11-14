@@ -1,5 +1,6 @@
 import { Box, IconButton, Typography, useTheme } from '@mui/material';
 import { Close as CloseIcon, Menu as MenuIcon, FiberManualRecord as DotIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useNoteStore } from '../stores/noteStore';
 
 //------------------------------------------------------------------------------//
@@ -13,6 +14,7 @@ interface NoteTabBarProps {
 // 탭 바 컴포넌트
 //------------------------------------------------------------------------------//
 export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { tabs, setActiveTab, closeTab } = useNoteStore();
 
@@ -86,7 +88,7 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
             }}
           >
             <Typography variant='body2' color='text.secondary'>
-              Open a note to start editing
+              {t('note.tabBar.openNote')}
             </Typography>
           </Box>
         ) : (
@@ -138,7 +140,7 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
                   color: tab.isActive ? 'text.primary' : 'text.secondary',
                 }}
               >
-                {tab.title || 'Untitled'}
+                {tab.title || t('note.tabBar.untitled')}
               </Typography>
 
               {/* 닫기 버튼 */}

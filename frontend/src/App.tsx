@@ -5,7 +5,7 @@ import { useAuthStore } from './stores/authStore';
 import Layout from './components/Layout';
 import SetupPasswordPage from './pages/SetupPasswordPage';
 import LoginPage from './pages/LoginPage';
-import WelcomePage from './pages/WelcomePage';
+import NotePage from './pages/NotePage';
 
 // 인증 상태에 따른 라우팅 로직
 function AuthRouter() {
@@ -56,9 +56,7 @@ function AuthRouter() {
       {/* 로그인된 경우 */}
       {isSetup && isAuthenticated && (
         <>
-          <Route element={<Layout />}>
-            <Route path='/' element={<WelcomePage />} />
-          </Route>
+          <Route path='/' element={<NotePage />} />
           <Route path='*' element={<Navigate to='/' replace />} />
         </>
       )}

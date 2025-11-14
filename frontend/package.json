@@ -18,6 +18,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@codemirror/lang-markdown": "^6.5.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.5",
@@ -25,6 +26,7 @@
     "@noteforest/types": "workspace:*",
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.2",
+    "@uiw/react-codemirror": "^4.25.3",
     "axios": "^1.13.2",
     "i18next": "^25.6.0",
     "react": "^19.1.1",

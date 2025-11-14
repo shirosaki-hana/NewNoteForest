@@ -106,14 +106,14 @@ export default function NoteEditor() {
 
     try {
       const newTagNames = [...currentNote.tags.map(t => t.name), tagInput.trim()];
-      await updateNote(currentNote.id, { tagNames: newTagNames });
+      const response = await updateNote(currentNote.id, { tagNames: newTagNames });
 
       setTagInput('');
       setShowTagInput(false);
 
-      // 노트 리스트 갱신
-      const { loadNoteContent, loadNotes, loadTags } = useNoteStore.getState();
-      await loadNoteContent(currentNote.id);
+      // currentNote만 업데이트 (편집 중인 content는 유지)
+      const { updateCurrentNote, loadNotes, loadTags } = useNoteStore.getState();
+      updateCurrentNote(response.note);
       loadNotes();
       loadTags();
       showSuccess(t('note.editor.messages.tagAdded'));
@@ -131,11 +131,11 @@ export default function NoteEditor() {
 
       try {
         const newTagNames = currentNote.tags.map(t => t.name).filter(name => name !== tagName);
-        await updateNote(currentNote.id, { tagNames: newTagNames });
+        const response = await updateNote(currentNote.id, { tagNames: newTagNames });
 
-        // 노트 리스트 갱신
-        const { loadNoteContent, loadNotes, loadTags } = useNoteStore.getState();
-        await loadNoteContent(currentNote.id);
+        // currentNote만 업데이트 (편집 중인 content는 유지)
+        const { updateCurrentNote, loadNotes, loadTags } = useNoteStore.getState();
+        updateCurrentNote(response.note);
         loadNotes();
         loadTags();
       } catch {

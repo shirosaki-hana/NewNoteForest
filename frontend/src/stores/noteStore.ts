@@ -60,6 +60,7 @@ interface NoteStoreState {
   setActiveTab: (tabId: number) => void;
 
   loadNoteContent: (noteId: number) => Promise<void>;
+  updateCurrentNote: (note: Note) => void;
   setCurrentNoteContent: (content: string) => void;
   saveCurrentNote: () => Promise<void>;
 
@@ -295,6 +296,14 @@ export const useNoteStore = create<NoteStoreState>()(
       set({ isLoadingNote: false });
       useSnackbarStore.getState().showError(i18n.t('note.store.loadNoteFailed'));
     }
+  },
+
+  updateCurrentNote: (note: Note) => {
+    const { tabs } = get();
+    set({
+      currentNote: note,
+      tabs: tabs.map(tab => (tab.id === note.id ? { ...tab, title: note.title } : tab)),
+    });
   },
 
   setCurrentNoteContent: (content: string) => {

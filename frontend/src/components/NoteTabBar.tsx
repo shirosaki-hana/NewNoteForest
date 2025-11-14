@@ -87,9 +87,6 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
               px: 2,
             }}
           >
-            <Typography variant='body2' color='text.secondary'>
-              {t('note.tabBar.openNote')}
-            </Typography>
           </Box>
         ) : (
           tabs.map(tab => (

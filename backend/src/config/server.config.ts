@@ -11,38 +11,39 @@ export const corsConfig = {
 };
 
 export const helmetConfig = {
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      // 비디오 스트리밍을 위한 설정 (blob URL, data URL 허용)
-      mediaSrc: ["'self'", 'blob:', 'data:'],
-      // HLS 세그먼트 fetch를 위한 설정
-      connectSrc: ["'self'", 'blob:', 'data:'],
-      // 스크립트 소스 (Video.js 등)
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      // 스타일 소스
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      // 이미지 소스 (썸네일 등)
-      imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
-      // 웹 워커 (Video.js가 사용할 수 있음)
-      workerSrc: ["'self'", 'blob:'],
-      // 폰트
-      fontSrc: ["'self'", 'data:'],
-      // 객체 임베드 비활성화
-      objectSrc: ["'none'"],
-      // base 태그 제한
-      baseUri: ["'self'"],
-      // form action 제한
-      formAction: ["'self'"],
-      // frame ancestors 제한 (clickjacking 방지)
-      frameAncestors: ["'self'"],
-      // 업그레이드 안전하지 않은 요청 (프로덕션에서만)
-      ...(isProduction && { upgradeInsecureRequests: [] }),
-    },
-  },
+  // 개발 환경에서는 CSP를 비활성화해서 디버깅과 도구 사용을 편하게 하고,
+  // 프로덕션에서만 엄격한 CSP를 적용합니다.
+  contentSecurityPolicy: isDevelopment
+    ? false
+    : {
+        directives: {
+          // 기본적으로 동일 오리진만 허용
+          defaultSrc: ["'self'"],
+          // 스크립트는 동일 오리진만 허용 (인라인 스크립트는 금지)
+          scriptSrc: ["'self'"],
+          // MUI 등에서 인라인 <style> 태그를 사용하므로 'unsafe-inline' 허용
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          // 앱에서 사용하는 이미지 (파비콘, PWA 아이콘, 데이터 URL, 외부 HTTPS 이미지)
+          imgSrc: ["'self'", 'data:', 'https:'],
+          // 폰트는 동일 오리진 + data URL
+          fontSrc: ["'self'", 'data:'],
+          // 프론트엔드가 호출하는 API는 동일 오리진만 허용
+          connectSrc: ["'self'"],
+          // object/embed 등은 완전히 차단
+          objectSrc: ["'none'"],
+          // base 태그 제한
+          baseUri: ["'self'"],
+          // form action 제한
+          formAction: ["'self'"],
+          // frame ancestors 제한 (clickjacking 방지)
+          frameAncestors: ["'self'"],
+          // 업그레이드 안전하지 않은 요청 (프로덕션에서만)
+          ...(isProduction && { upgradeInsecureRequests: [] }),
+        },
+      },
   crossOriginEmbedderPolicy: false,
-  // Cross-Origin-Resource-Policy 헤더 설정
-  crossOriginResourcePolicy: { policy: 'cross-origin' as const },
+  // Cross-Origin-Resource-Policy: 노트 앱은 동일 오리진 리소스만 사용하므로 same-origin으로 제한
+  crossOriginResourcePolicy: { policy: 'same-origin' as const },
 };
 
 export const rateLimitConfig = {

@@ -104,7 +104,6 @@ export default {
         logout: 'Logout',
       },
       tabBar: {
-        openNote: 'Open a note to start editing',
         untitled: 'Untitled',
       },
       store: {

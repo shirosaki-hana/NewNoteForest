@@ -103,7 +103,6 @@ export default {
         logout: '로그아웃',
       },
       tabBar: {
-        openNote: '노트를 열어 편집을 시작하세요',
         untitled: '제목 없음',
       },
       store: {

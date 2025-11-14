@@ -7,6 +7,7 @@ import { useNoteStore } from '../stores/noteStore';
 import { useThemeStore } from '../stores/themeStore';
 import { useDialogStore } from '../stores/dialogStore';
 import { useSnackbarStore } from '../stores/snackbarStore';
+import { updateNote } from '../api/notes';
 
 //------------------------------------------------------------------------------//
 // 노트 에디터 컴포넌트
@@ -22,15 +23,19 @@ export default function NoteEditor() {
   const [title, setTitle] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
+  const [prevNoteId, setPrevNoteId] = useState<number | null>(null);
 
   //----------------------------------------------------------------------------//
   // 현재 노트가 변경되면 제목 업데이트
   //----------------------------------------------------------------------------//
-  useEffect(() => {
-    if (currentNote) {
-      setTitle(currentNote.title);
-    }
-  }, [currentNote]);
+  // 다른 노트로 전환될 때만 title을 초기화
+  if (currentNote && currentNote.id !== prevNoteId) {
+    setPrevNoteId(currentNote.id);
+    setTitle(currentNote.title);
+  } else if (!currentNote && prevNoteId !== null) {
+    setPrevNoteId(null);
+    setTitle('');
+  }
 
   //----------------------------------------------------------------------------//
   // 제목 저장
@@ -39,7 +44,6 @@ export default function NoteEditor() {
     if (!currentNote || title === currentNote.title) return;
 
     try {
-      const { updateNote } = await import('../api/notes');
       await updateNote(currentNote.id, { title });
       // 노트 리스트 갱신
       const { loadNotes } = useNoteStore.getState();
@@ -56,7 +60,6 @@ export default function NoteEditor() {
     if (!currentNote || !tagInput.trim()) return;
 
     try {
-      const { updateNote } = await import('../api/notes');
       const newTagNames = [...currentNote.tags.map(t => t.name), tagInput.trim()];
       await updateNote(currentNote.id, { tagNames: newTagNames });
 
@@ -82,7 +85,6 @@ export default function NoteEditor() {
       if (!currentNote) return;
 
       try {
-        const { updateNote } = await import('../api/notes');
         const newTagNames = currentNote.tags.map(t => t.name).filter(name => name !== tagName);
         await updateNote(currentNote.id, { tagNames: newTagNames });
 

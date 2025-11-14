@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Note, Tag } from '@noteforest/types';
 import * as noteApi from '../api/notes';
+import { useSnackbarStore } from './snackbarStore';
 
 //------------------------------------------------------------------------------//
 // 탭 인터페이스
@@ -113,7 +114,6 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
       set({ notes: response.notes, total: response.total, isLoadingNotes: false });
     } catch {
       set({ isLoadingNotes: false });
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showError('Failed to load notes');
     }
   },
@@ -128,7 +128,6 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
       set({ tags: response.tags, isLoadingTags: false });
     } catch {
       set({ isLoadingTags: false });
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showError('Failed to load tags');
     }
   },
@@ -270,7 +269,6 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
       });
     } catch {
       set({ isLoadingNote: false });
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showError('Failed to load note');
     }
   },
@@ -307,11 +305,9 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
       // 노트 리스트 갱신
       get().loadNotes();
 
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showSuccess('Note saved successfully');
     } catch {
       set({ isSaving: false });
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showError('Failed to save note');
     }
   },
@@ -333,10 +329,8 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
       // 새 노트를 탭에서 열기
       await get().openNoteInTab(response.note.id);
 
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showSuccess('Note created successfully');
     } catch {
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showError('Failed to create note');
     }
   },
@@ -356,7 +350,6 @@ export const useNoteStore = create<NoteStoreState>((set, get) => ({
       // 노트 리스트 갱신
       get().loadNotes();
     } catch (error) {
-      const { useSnackbarStore } = await import('./snackbarStore');
       useSnackbarStore.getState().showError('Failed to delete note');
       throw error; // NoteEditor에서 캐치할 수 있도록 rethrow
     }

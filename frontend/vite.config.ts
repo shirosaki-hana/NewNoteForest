@@ -20,12 +20,12 @@ export default defineConfig({
       output: {
         manualChunks: id => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('axios') || id.includes('zustand')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('axios') || id.includes('zustand') || id.includes('zod') || id.includes('@mui')) {
               return 'vendor';
             }
-            //if (id.includes('@mui')) {
-            //  return 'theme'; MUI가 왜 청크 분리하면 망가지는거지?
-            //}
+            if (id.includes('codemirror')) {
+              return 'editor'; 
+            }
           }
         },
       },

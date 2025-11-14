@@ -17,7 +17,7 @@ export const useSettingsStore = create<SettingsState>()(
       closeSettings: () => set({ isOpen: false }),
     }),
     {
-      name: 'videoforest-settings',
+      name: 'settings',
       partialize: state => ({ autoPlayNext: state.autoPlayNext }), // isOpen은 저장하지 않음
     }
   )

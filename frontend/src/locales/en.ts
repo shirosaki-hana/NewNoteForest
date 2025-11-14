@@ -2,7 +2,7 @@ export default {
   translation: {
     // Common
     common: {
-      appName: 'VideoForest',
+      appName: 'NoteForest',
       loading: 'Loading...',
       error: 'Error',
       success: 'Success',

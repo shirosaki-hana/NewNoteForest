@@ -2,11 +2,16 @@ import { build } from 'esbuild';
 
 // 네이티브/런타임 종속성은 번들에서 제외해야 합니다.
 const externals = [
-  // Prisma & Engines
+  // Prisma 7 (순수 TS + WASM 기반, Rust Engine 제거됨)
+  // - WASM 동적 로딩 및 Generated Client 경로 문제로 external 유지 필요
   '@prisma/client',
-  '@prisma/engines',
+  '@prisma/client-runtime-utils',
+  '@prisma/adapter-better-sqlite3',
   'prisma',
   '.prisma/client',
+
+  // SQLite (Prisma 7 adapter)
+  'better-sqlite3',
 
   // Native
   '@node-rs/argon2',
@@ -28,7 +33,7 @@ await build({
   bundle: true,
   platform: 'node',
   format: 'esm',
-  target: 'node22',
+  target: 'node24',
   sourcemap: true,
   splitting: false,
   packages: 'bundle',

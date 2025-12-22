@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import {
   Box,
   IconButton,
@@ -19,6 +19,8 @@ import {
   Add as AddIcon,
   Visibility as ViewIcon,
   Edit as EditIcon,
+  FileDownload as ExportIcon,
+  FileUpload as ImportIcon,
 } from '@mui/icons-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
@@ -29,6 +31,12 @@ import { useDialogStore } from '../stores/dialogStore';
 import { useSnackbarStore } from '../stores/snackbarStore';
 import { updateNote } from '../api/notes';
 import MarkdownRenderer from './MarkdownRenderer';
+import {
+  noteToMarkdown,
+  parseMarkdownWithFrontMatter,
+  downloadMarkdownFile,
+  readMarkdownFile,
+} from '../lib/markdownExport';
 
 //------------------------------------------------------------------------------//
 // 노트 에디터 컴포넌트
@@ -38,8 +46,10 @@ export default function NoteEditor() {
   const theme = useTheme();
   const { openDialog } = useDialogStore();
   const { showError, showSuccess } = useSnackbarStore();
-  const { currentNote, currentNoteContent, isLoadingNote, isSaving, setCurrentNoteContent, saveCurrentNote, deleteCurrentNote } =
+  const { currentNote, currentNoteContent, isLoadingNote, isSaving, setCurrentNoteContent, saveCurrentNote, deleteCurrentNote, importNote } =
     useNoteStore();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
   const [tagInput, setTagInput] = useState('');
@@ -211,6 +221,77 @@ export default function NoteEditor() {
   }, []);
 
   //----------------------------------------------------------------------------//
+  // 노트 내보내기 (Export)
+  //----------------------------------------------------------------------------//
+  const handleExport = useCallback(() => {
+    if (!currentNote) return;
+
+    try {
+      const markdown = noteToMarkdown({
+        title: currentNote.title,
+        tags: currentNote.tags.map(t => t.name),
+        content: currentNoteContent,
+      });
+
+      // 파일명에서 사용할 수 없는 문자 제거
+      const safeTitle = currentNote.title.replace(/[<>:"/\\|?*]/g, '_');
+      downloadMarkdownFile(safeTitle, markdown);
+      
+      showSuccess(t('note.editor.importExport.exportSuccess'));
+    } catch {
+      showError(t('note.editor.importExport.exportFailed'));
+    }
+  }, [currentNote, currentNoteContent, showSuccess, showError, t]);
+
+  //----------------------------------------------------------------------------//
+  // 노트 불러오기 (Import)
+  //----------------------------------------------------------------------------//
+  const handleImportClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // 파일 확장자 검증
+    if (!file.name.toLowerCase().endsWith('.md')) {
+      showError(t('note.editor.importExport.invalidFile'));
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      const content = await readMarkdownFile(file);
+      const parsed = parseMarkdownWithFrontMatter(content);
+
+      if (parsed.isValid && parsed.title) {
+        // 유효한 front-matter가 있는 경우
+        await importNote({
+          title: parsed.title,
+          content: parsed.content,
+          tagNames: parsed.tags || [],
+        });
+        showSuccess(t('note.editor.importExport.importSuccess'));
+      } else {
+        // front-matter가 없거나 유효하지 않은 경우 - 새 노트로 생성
+        const fileName = file.name.replace(/\.md$/i, '');
+        await importNote({
+          title: fileName || 'Imported Note',
+          content: parsed.content,
+          tagNames: [],
+        });
+        showSuccess(t('note.editor.importExport.importAsNewNote'));
+      }
+    } catch {
+      showError(t('note.editor.importExport.importFailed'));
+    }
+
+    // 같은 파일 다시 선택할 수 있도록 초기화
+    event.target.value = '';
+  }, [importNote, showSuccess, showError, t]);
+
+  //----------------------------------------------------------------------------//
   // 키보드 단축키
   //----------------------------------------------------------------------------//
   useEffect(() => {
@@ -307,6 +388,28 @@ export default function NoteEditor() {
               <DeleteIcon />
             </IconButton>
           </Tooltip>
+
+          <Box sx={{ ml: 1, borderLeft: 1, borderColor: 'divider', pl: 1, display: 'flex', gap: 0.5 }}>
+            <Tooltip title={t('note.editor.importExport.import')}>
+              <IconButton size='small' onClick={handleImportClick}>
+                <ImportIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('note.editor.importExport.export')}>
+              <IconButton size='small' onClick={handleExport}>
+                <ExportIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {/* Hidden file input for import */}
+          <input
+            type='file'
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept='.md'
+            style={{ display: 'none' }}
+          />
 
           <Box sx={{ ml: 1, borderLeft: 1, borderColor: 'divider', pl: 1 }}>
             <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small' aria-label='view mode'>

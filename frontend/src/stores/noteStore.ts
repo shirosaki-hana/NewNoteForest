@@ -68,6 +68,7 @@ interface NoteStoreState {
   saveCurrentNote: () => Promise<void>;
 
   createNewNote: () => Promise<void>;
+  importNote: (data: { title: string; content: string; tagNames: string[] }) => Promise<void>;
   deleteCurrentNote: () => Promise<void>;
 
   toggleSidebar: () => void;
@@ -395,6 +396,23 @@ export const useNoteStore = create<NoteStoreState>()(
         } catch {
           useSnackbarStore.getState().showError(i18n.t('note.store.createNoteFailed'));
         }
+      },
+
+      importNote: async (data: { title: string; content: string; tagNames: string[] }) => {
+        const response = await noteApi.createNote({
+          title: data.title,
+          content: data.content,
+          tagNames: data.tagNames,
+        });
+
+        // 노트 리스트 갱신
+        await get().loadNotes();
+        
+        // 태그 리스트 갱신
+        await get().loadTags();
+
+        // 새 노트를 탭에서 열기
+        await get().openNoteInTab(response.note.id);
       },
 
       deleteCurrentNote: async () => {

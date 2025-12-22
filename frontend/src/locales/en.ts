@@ -89,6 +89,16 @@ export default {
           noteDeleted: 'Note deleted successfully',
           noteDeleteFailed: 'Failed to delete note',
         },
+        importExport: {
+          export: 'Export',
+          import: 'Import',
+          exportSuccess: 'Note exported successfully',
+          exportFailed: 'Failed to export note',
+          importSuccess: 'Note imported successfully',
+          importFailed: 'Failed to import note',
+          invalidFile: 'Invalid file. Only .md files are supported',
+          importAsNewNote: 'Imported as new note (no metadata found)',
+        },
       },
       sidebar: {
         searchPlaceholder: 'Search notes...',

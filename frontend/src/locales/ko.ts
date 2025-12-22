@@ -88,6 +88,16 @@ export default {
           noteDeleted: '노트가 삭제되었습니다',
           noteDeleteFailed: '노트 삭제에 실패했습니다',
         },
+        importExport: {
+          export: '내보내기',
+          import: '불러오기',
+          exportSuccess: '노트를 내보냈습니다',
+          exportFailed: '노트 내보내기에 실패했습니다',
+          importSuccess: '노트를 불러왔습니다',
+          importFailed: '노트 불러오기에 실패했습니다',
+          invalidFile: '유효하지 않은 파일입니다. .md 파일만 지원합니다',
+          importAsNewNote: '메타데이터가 없어 새 노트로 불러왔습니다',
+        },
       },
       sidebar: {
         searchPlaceholder: '노트 검색...',

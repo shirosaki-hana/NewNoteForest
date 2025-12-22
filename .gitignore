@@ -16,3 +16,37 @@ node_modules/
 backend/media/
 backend/temp/
 backend/src/test/output
+
+# ===================
+# Tauri / Rust
+# ===================
+
+# Rust 빌드 출력
+src-tauri/target/
+
+# Tauri CLI가 생성하는 WixTools (Windows 인스톨러용)
+src-tauri/WixTools/
+
+# Tauri 빌드 번들 출력
+src-tauri/bundle/
+
+# IDE / 에디터 설정
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS 생성 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 로그 파일
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 테스트 커버리지
+coverage/

@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { useNoteStore } from '../stores/noteStore';
 import { useAuthStore } from '../stores/authStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { isTauri } from '../api/adapter';
 
 //------------------------------------------------------------------------------//
 // 상수
@@ -310,12 +311,15 @@ export default function NoteSidebar({ open, onClose, variant = 'permanent' }: No
               <ListItemText primary={t('note.sidebar.settings')} />
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleLogout}>
-              <LogoutIcon sx={{ mr: 2 }} />
-              <ListItemText primary={t('note.sidebar.logout')} />
-            </ListItemButton>
-          </ListItem>
+          {/* Tauri 환경에서는 로그아웃 버튼 숨김 */}
+          {!isTauri() && (
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout}>
+                <LogoutIcon sx={{ mr: 2 }} />
+                <ListItemText primary={t('note.sidebar.logout')} />
+              </ListItemButton>
+            </ListItem>
+          )}
         </List>
       </Box>
     </Box>

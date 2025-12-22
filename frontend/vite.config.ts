@@ -38,7 +38,7 @@ export default defineConfig({
               const packageName = getPackageName(id);
               if (!packageName) return;
 
-              // React 계열
+              // React 계열 (가장 먼저 정의 - 다른 청크들의 의존성)
               if (
                 packageName === 'react' ||
                 packageName === 'react-dom' ||
@@ -55,43 +55,49 @@ export default defineConfig({
                 return 'vendor-mui';
               }
 
-              // CodeMirror 에디터 계열
+              // Milkdown 에디터 계열
               if (
-                packageName.startsWith('@codemirror/') ||
-                packageName === '@uiw/react-codemirror'
+                packageName.startsWith('@milkdown/') ||
+                packageName === 'prosemirror-model' ||
+                packageName === 'prosemirror-state' ||
+                packageName === 'prosemirror-view' ||
+                packageName === 'prosemirror-transform' ||
+                packageName === 'prosemirror-commands' ||
+                packageName === 'prosemirror-keymap' ||
+                packageName === 'prosemirror-inputrules' ||
+                packageName === 'prosemirror-gapcursor' ||
+                packageName === 'prosemirror-dropcursor' ||
+                packageName === 'prosemirror-schema-list' ||
+                packageName === 'prosemirror-tables' ||
+                packageName === 'prismjs' ||
+                packageName === 'refractor'
               ) {
                 return 'vendor-editor';
               }
 
-              // Markdown 렌더링 계열
-              if (
-                packageName === 'react-markdown' ||
-                packageName.startsWith('rehype-') ||
-                packageName.startsWith('remark-') ||
-                packageName.startsWith('unist-')
-              ) {
-                return 'vendor-markdown';
-              }
-
-              // 라우팅 / HTTP / i18n / 상태관리 등 주요 도메인
+              // 라우팅
               if (packageName === 'react-router-dom') {
                 return 'vendor-router';
               }
+
+              // HTTP
               if (packageName === 'axios') {
                 return 'vendor-http';
               }
+
+              // i18n
               if (
                 packageName === 'i18next' ||
                 packageName === 'react-i18next'
               ) {
                 return 'vendor-i18n';
               }
+
+              // 상태관리
               if (packageName === 'zustand') {
                 return 'vendor-state';
               }
-              if (packageName === 'highlight.js') {
-                return 'vendor-highlight';
-              }
+
               return;
             },
           },

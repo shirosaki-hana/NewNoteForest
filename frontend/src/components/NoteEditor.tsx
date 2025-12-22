@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import {
   Box,
   IconButton,
@@ -9,34 +9,165 @@ import {
   Tooltip,
   CircularProgress,
   useTheme,
-  ToggleButton,
-  ToggleButtonGroup,
 } from '@mui/material';
 import {
   Save as SaveIcon,
   Delete as DeleteIcon,
   LocalOffer as TagIcon,
   Add as AddIcon,
-  Visibility as ViewIcon,
-  Edit as EditIcon,
   FileDownload as ExportIcon,
   FileUpload as ImportIcon,
 } from '@mui/icons-material';
-import CodeMirror from '@uiw/react-codemirror';
-import { markdown } from '@codemirror/lang-markdown';
-import { EditorView } from '@codemirror/view';
 import { useTranslation } from 'react-i18next';
 import { useNoteStore } from '../stores/noteStore';
 import { useDialogStore } from '../stores/dialogStore';
 import { useSnackbarStore } from '../stores/snackbarStore';
 import { updateNote } from '../api/notes';
-import MarkdownRenderer from './MarkdownRenderer';
 import {
   noteToMarkdown,
   parseMarkdownWithFrontMatter,
   downloadMarkdownFile,
   readMarkdownFile,
 } from '../lib/markdownExport';
+
+// Milkdown imports
+import { Editor, rootCtx, defaultValueCtx } from '@milkdown/kit/core';
+import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
+import { commonmark } from '@milkdown/kit/preset/commonmark';
+import { gfm } from '@milkdown/preset-gfm';
+import { prism, prismConfig } from '@milkdown/plugin-prism';
+import { listener, listenerCtx } from '@milkdown/kit/plugin/listener';
+import { history } from '@milkdown/kit/plugin/history';
+import { clipboard } from '@milkdown/kit/plugin/clipboard';
+import { replaceAll, $prose } from '@milkdown/kit/utils';
+import { Plugin, PluginKey } from '@milkdown/kit/prose/state';
+
+// Refractor (for Milkdown prism plugin)
+import { refractor } from 'refractor/core';
+import javascript from 'refractor/javascript';
+import typescript from 'refractor/typescript';
+import jsx from 'refractor/jsx';
+import tsx from 'refractor/tsx';
+import css from 'refractor/css';
+import python from 'refractor/python';
+import java from 'refractor/java';
+import json from 'refractor/json';
+import bash from 'refractor/bash';
+import markdown from 'refractor/markdown';
+import sql from 'refractor/sql';
+import yaml from 'refractor/yaml';
+
+// Register languages with refractor
+refractor.register(javascript);
+refractor.register(typescript);
+refractor.register(jsx);
+refractor.register(tsx);
+refractor.register(css);
+refractor.register(python);
+refractor.register(java);
+refractor.register(json);
+refractor.register(bash);
+refractor.register(markdown);
+refractor.register(sql);
+refractor.register(yaml);
+
+// Task list checkbox toggle plugin
+const taskListTogglePluginKey = new PluginKey('taskListToggle');
+const taskListTogglePlugin = $prose(() => {
+  return new Plugin({
+    key: taskListTogglePluginKey,
+    props: {
+      handleClick(view, pos, event) {
+        const target = event.target as HTMLElement;
+        // Check if click is on a task list item (the ::before pseudo element area)
+        const listItem = target.closest('li[data-item-type="task"]');
+        if (!listItem) return false;
+
+        // Check if click is in the checkbox area (left part of the item)
+        const rect = listItem.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        // Only toggle if clicking in the first 28px (checkbox area)
+        if (clickX > 28) return false;
+
+        // Find the position of this list item in the document
+        const { state, dispatch } = view;
+        const $pos = state.doc.resolve(pos);
+        
+        // Find the list_item node
+        for (let depth = $pos.depth; depth >= 0; depth--) {
+          const node = $pos.node(depth);
+          if (node.type.name === 'list_item' && node.attrs.checked !== null) {
+            const nodePos = $pos.before(depth);
+            const newAttrs = {
+              ...node.attrs,
+              checked: node.attrs.checked === 'true' ? 'false' : 'true',
+            };
+            dispatch(state.tr.setNodeMarkup(nodePos, undefined, newAttrs));
+            return true;
+          }
+        }
+        return false;
+      },
+    },
+  });
+});
+
+//------------------------------------------------------------------------------//
+// Milkdown 에디터 래퍼 컴포넌트
+//------------------------------------------------------------------------------//
+interface MilkdownEditorProps {
+  content: string;
+  onChange: (value: string) => void;
+}
+
+function MilkdownEditor({ content, onChange }: MilkdownEditorProps) {
+  const contentRef = useRef(content);
+  const editorRef = useRef<Editor | null>(null);
+  const isExternalUpdate = useRef(false);
+
+  // content prop이 변경되면 ref 업데이트
+  useEffect(() => {
+    if (contentRef.current !== content && editorRef.current) {
+      isExternalUpdate.current = true;
+      contentRef.current = content;
+      editorRef.current.action(replaceAll(content));
+    }
+  }, [content]);
+
+  const { get } = useEditor((root) =>
+    Editor.make()
+      .config((ctx) => {
+        ctx.set(rootCtx, root);
+        ctx.set(defaultValueCtx, content);
+        ctx.set(prismConfig.key, {
+          configureRefractor: () => refractor,
+        });
+        ctx.get(listenerCtx).markdownUpdated((_ctx, markdown) => {
+          // 외부 업데이트로 인한 변경은 무시
+          if (isExternalUpdate.current) {
+            isExternalUpdate.current = false;
+            return;
+          }
+          contentRef.current = markdown;
+          onChange(markdown);
+        });
+      })
+      .use(commonmark)
+      .use(gfm)
+      .use(prism)
+      .use(listener)
+      .use(history)
+      .use(clipboard)
+      .use(taskListTogglePlugin)
+  );
+
+  // 에디터 인스턴스 저장
+  useEffect(() => {
+    editorRef.current = get() ?? null;
+  }, [get]);
+
+  return <Milkdown />;
+}
 
 //------------------------------------------------------------------------------//
 // 노트 에디터 컴포넌트
@@ -55,49 +186,6 @@ export default function NoteEditor() {
   const [tagInput, setTagInput] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
   const [prevNoteId, setPrevNoteId] = useState<number | null>(null);
-  const [viewMode, setViewMode] = useState<'edit' | 'view'>('edit');
-
-  //----------------------------------------------------------------------------//
-  // CodeMirror 테마 생성 (Material-UI 테마와 연동)
-  //----------------------------------------------------------------------------//
-  const codeMirrorTheme = useMemo(
-    () =>
-      EditorView.theme(
-        {
-          '&': {
-            backgroundColor: `${theme.palette.background.default}`,
-            height: '100%',
-          },
-          '.cm-content': {
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
-            fontSize: '15px',
-            lineHeight: '1.6',
-          },
-          '.cm-cursor, .cm-dropCursor': {
-            borderLeftColor: theme.palette.primary.main,
-          },
-          '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(144, 202, 249, 0.16)' : 'rgba(25, 118, 210, 0.12)',
-          },
-          '.cm-activeLine': {
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
-          },
-          '.cm-gutters': {
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.secondary,
-            border: 'none',
-          },
-          '.cm-activeLineGutter': {
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
-          },
-          '.cm-lineNumbers .cm-gutterElement': {
-            color: theme.palette.text.disabled,
-          },
-        },
-        { dark: theme.palette.mode === 'dark' }
-      ),
-    [theme]
-  );
 
   //----------------------------------------------------------------------------//
   // 현재 노트가 변경되면 제목 업데이트
@@ -212,15 +300,6 @@ export default function NoteEditor() {
   }, [deleteCurrentNote, openDialog, showError, showSuccess, t]);
 
   //----------------------------------------------------------------------------//
-  // 보기 모드 전환
-  //----------------------------------------------------------------------------//
-  const handleViewModeChange = useCallback((_event: React.MouseEvent<HTMLElement>, newMode: 'edit' | 'view' | null) => {
-    if (newMode !== null) {
-      setViewMode(newMode);
-    }
-  }, []);
-
-  //----------------------------------------------------------------------------//
   // 노트 내보내기 (Export)
   //----------------------------------------------------------------------------//
   const handleExport = useCallback(() => {
@@ -236,7 +315,7 @@ export default function NoteEditor() {
       // 파일명에서 사용할 수 없는 문자 제거
       const safeTitle = currentNote.title.replace(/[<>:"/\\|?*]/g, '_');
       downloadMarkdownFile(safeTitle, markdown);
-      
+
       showSuccess(t('note.editor.importExport.exportSuccess'));
     } catch {
       showError(t('note.editor.importExport.exportFailed'));
@@ -250,46 +329,49 @@ export default function NoteEditor() {
     fileInputRef.current?.click();
   }, []);
 
-  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // 파일 확장자 검증
-    if (!file.name.toLowerCase().endsWith('.md')) {
-      showError(t('note.editor.importExport.invalidFile'));
-      event.target.value = '';
-      return;
-    }
-
-    try {
-      const content = await readMarkdownFile(file);
-      const parsed = parseMarkdownWithFrontMatter(content);
-
-      if (parsed.isValid && parsed.title) {
-        // 유효한 front-matter가 있는 경우
-        await importNote({
-          title: parsed.title,
-          content: parsed.content,
-          tagNames: parsed.tags || [],
-        });
-        showSuccess(t('note.editor.importExport.importSuccess'));
-      } else {
-        // front-matter가 없거나 유효하지 않은 경우 - 새 노트로 생성
-        const fileName = file.name.replace(/\.md$/i, '');
-        await importNote({
-          title: fileName || 'Imported Note',
-          content: parsed.content,
-          tagNames: [],
-        });
-        showSuccess(t('note.editor.importExport.importAsNewNote'));
+      // 파일 확장자 검증
+      if (!file.name.toLowerCase().endsWith('.md')) {
+        showError(t('note.editor.importExport.invalidFile'));
+        event.target.value = '';
+        return;
       }
-    } catch {
-      showError(t('note.editor.importExport.importFailed'));
-    }
 
-    // 같은 파일 다시 선택할 수 있도록 초기화
-    event.target.value = '';
-  }, [importNote, showSuccess, showError, t]);
+      try {
+        const content = await readMarkdownFile(file);
+        const parsed = parseMarkdownWithFrontMatter(content);
+
+        if (parsed.isValid && parsed.title) {
+          // 유효한 front-matter가 있는 경우
+          await importNote({
+            title: parsed.title,
+            content: parsed.content,
+            tagNames: parsed.tags || [],
+          });
+          showSuccess(t('note.editor.importExport.importSuccess'));
+        } else {
+          // front-matter가 없거나 유효하지 않은 경우 - 새 노트로 생성
+          const fileName = file.name.replace(/\.md$/i, '');
+          await importNote({
+            title: fileName || 'Imported Note',
+            content: parsed.content,
+            tagNames: [],
+          });
+          showSuccess(t('note.editor.importExport.importAsNewNote'));
+        }
+      } catch {
+        showError(t('note.editor.importExport.importFailed'));
+      }
+
+      // 같은 파일 다시 선택할 수 있도록 초기화
+      event.target.value = '';
+    },
+    [importNote, showSuccess, showError, t]
+  );
 
   //----------------------------------------------------------------------------//
   // 키보드 단축키
@@ -403,28 +485,7 @@ export default function NoteEditor() {
           </Box>
 
           {/* Hidden file input for import */}
-          <input
-            type='file'
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept='.md'
-            style={{ display: 'none' }}
-          />
-
-          <Box sx={{ ml: 1, borderLeft: 1, borderColor: 'divider', pl: 1 }}>
-            <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small' aria-label='view mode'>
-              <ToggleButton value='edit' aria-label='edit mode'>
-                <Tooltip title={t('note.editor.toggleEditMode')}>
-                  <EditIcon fontSize='small' />
-                </Tooltip>
-              </ToggleButton>
-              <ToggleButton value='view' aria-label='view mode'>
-                <Tooltip title={t('note.editor.toggleViewMode')}>
-                  <ViewIcon fontSize='small' />
-                </Tooltip>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+          <input type='file' ref={fileInputRef} onChange={handleFileChange} accept='.md' style={{ display: 'none' }} />
         </Box>
 
         <Typography variant='caption' color='text.secondary'>
@@ -504,25 +565,184 @@ export default function NoteEditor() {
         )}
       </Box>
 
-      {/* 에디터 / 렌더러 */}
+      {/* Milkdown 에디터 */}
       <Box
         sx={{
           flex: 1,
           overflow: 'auto',
           px: 3,
           pb: 2,
+          // Milkdown 스타일 커스터마이징
+          '& .milkdown': {
+            height: '100%',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
+            fontSize: '15px',
+            lineHeight: 1.6,
+            color: theme.palette.text.primary,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            '& .editor': {
+              padding: 0,
+            },
+          },
+          '& .ProseMirror': {
+            outline: 'none',
+            minHeight: '100%',
+          },
+          // 제목 스타일
+          '& .ProseMirror h1, & .ProseMirror h2, & .ProseMirror h3, & .ProseMirror h4, & .ProseMirror h5, & .ProseMirror h6': {
+            marginTop: '24px',
+            marginBottom: '12px',
+            fontWeight: 600,
+            lineHeight: 1.3,
+            color: theme.palette.text.primary,
+          },
+          '& .ProseMirror h1': {
+            fontSize: '2rem',
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            paddingBottom: '8px',
+          },
+          '& .ProseMirror h2': {
+            fontSize: '1.5rem',
+          },
+          '& .ProseMirror h3': {
+            fontSize: '1.25rem',
+          },
+          // 문단 스타일
+          '& .ProseMirror p': {
+            marginTop: '8px',
+            marginBottom: '8px',
+          },
+          // 링크 스타일
+          '& .ProseMirror a': {
+            color: theme.palette.primary.main,
+            textDecoration: 'none',
+            fontWeight: 500,
+            '&:hover': {
+              textDecoration: 'underline',
+              color: theme.palette.primary.light,
+            },
+          },
+          // 인라인 코드
+          '& .ProseMirror code': {
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontSize: '0.875rem',
+            fontFamily: '"JetBrains Mono", "Menlo", "Monaco", "Courier New", monospace',
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+            color: theme.palette.mode === 'dark' ? '#90caf9' : '#1976d2',
+          },
+          // 코드 블록
+          '& .ProseMirror pre': {
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: '8px',
+            padding: '16px',
+            marginTop: '8px',
+            marginBottom: '16px',
+            overflow: 'auto',
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.03)',
+            '& code': {
+              padding: 0,
+              fontSize: '0.875rem',
+              backgroundColor: 'transparent',
+              color: 'inherit',
+            },
+          },
+          // 인용구
+          '& .ProseMirror blockquote': {
+            borderLeft: `4px solid ${theme.palette.primary.main}`,
+            paddingLeft: '16px',
+            margin: '16px 0',
+            color: theme.palette.text.secondary,
+            fontStyle: 'italic',
+            '& p': {
+              marginTop: '8px',
+              marginBottom: '8px',
+            },
+          },
+          // 리스트
+          '& .ProseMirror ul, & .ProseMirror ol': {
+            paddingLeft: '24px',
+            marginTop: '8px',
+            marginBottom: '16px',
+            '& li': {
+              marginBottom: '4px',
+            },
+          },
+          // 체크리스트 (GFM task list)
+          '& .ProseMirror li[data-item-type="task"]': {
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '8px',
+            listStyleType: 'none',
+            position: 'relative',
+            marginLeft: '-1em',
+            '&::before': {
+              content: '""',
+              width: '16px',
+              height: '16px',
+              minWidth: '16px',
+              border: `2px solid ${theme.palette.divider}`,
+              borderRadius: '3px',
+              marginTop: '3px',
+              cursor: 'pointer',
+              backgroundColor: theme.palette.background.paper,
+              transition: 'all 0.15s ease',
+            },
+            '&:hover::before': {
+              borderColor: theme.palette.primary.main,
+            },
+          },
+          '& .ProseMirror li[data-item-type="task"][data-checked="true"]': {
+            '&::before': {
+              backgroundColor: theme.palette.primary.main,
+              borderColor: theme.palette.primary.main,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E")`,
+              backgroundSize: '12px',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            },
+            '& > p': {
+              textDecoration: 'line-through',
+              opacity: 0.7,
+            },
+          },
+          // 테이블
+          '& .ProseMirror table': {
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginTop: '8px',
+            marginBottom: '16px',
+            border: `1px solid ${theme.palette.divider}`,
+            '& th, & td': {
+              padding: '8px 12px',
+              border: `1px solid ${theme.palette.divider}`,
+              textAlign: 'left',
+            },
+            '& th': {
+              fontWeight: 600,
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+            },
+          },
+          // 구분선
+          '& .ProseMirror hr': {
+            border: 'none',
+            borderTop: `1px solid ${theme.palette.divider}`,
+            margin: '24px 0',
+          },
+          // 이미지
+          '& .ProseMirror img': {
+            maxWidth: '100%',
+            height: 'auto',
+            borderRadius: '8px',
+            marginTop: '8px',
+            marginBottom: '16px',
+          },
         }}
       >
-        {viewMode === 'edit' ? (
-          <CodeMirror
-            value={currentNoteContent}
-            onChange={handleContentChange}
-            extensions={[markdown(), codeMirrorTheme, EditorView.lineWrapping]}
-            theme='none'
-          />
-        ) : (
-          <MarkdownRenderer content={currentNoteContent} />
-        )}
+        <MilkdownProvider>
+          <MilkdownEditor content={currentNoteContent} onChange={handleContentChange} />
+        </MilkdownProvider>
       </Box>
     </Box>
   );

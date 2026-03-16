@@ -71,7 +71,12 @@ export function parseMarkdownWithFrontMatter(markdown: string): ParsedMarkdown {
         tags.push(...parsed.data.tags.filter((tag: unknown) => typeof tag === 'string'));
       } else if (typeof parsed.data.tags === 'string') {
         // 쉼표로 구분된 문자열도 지원
-        tags.push(...parsed.data.tags.split(',').map((t: string) => t.trim()).filter(Boolean));
+        tags.push(
+          ...parsed.data.tags
+            .split(',')
+            .map((t: string) => t.trim())
+            .filter(Boolean)
+        );
       }
 
       return {
@@ -102,15 +107,15 @@ export function parseMarkdownWithFrontMatter(markdown: string): ParsedMarkdown {
 export function downloadMarkdownFile(filename: string, content: string): void {
   const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  
+
   const link = document.createElement('a');
   link.href = url;
   link.download = filename.endsWith('.md') ? filename : `${filename}.md`;
-  
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   URL.revokeObjectURL(url);
 }
 
@@ -120,8 +125,8 @@ export function downloadMarkdownFile(filename: string, content: string): void {
 export function readMarkdownFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = (event) => {
+
+    reader.onload = event => {
       const result = event.target?.result;
       if (typeof result === 'string') {
         resolve(result);
@@ -129,11 +134,11 @@ export function readMarkdownFile(file: File): Promise<string> {
         reject(new Error('Failed to read file'));
       }
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Failed to read file'));
     };
-    
+
     reader.readAsText(file, 'utf-8');
   });
 }

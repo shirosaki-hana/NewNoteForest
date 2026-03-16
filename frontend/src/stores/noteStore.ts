@@ -173,7 +173,7 @@ export const useNoteStore = create<NoteStoreState>()(
           set({ tags: response.tags, isLoadingTags: false });
         } catch {
           set({ isLoadingTags: false });
-          useSnackbarStore.getState().showError(i18n.t('note.store.loadTagsFailed')); 
+          useSnackbarStore.getState().showError(i18n.t('note.store.loadTagsFailed'));
         }
       },
 
@@ -283,9 +283,7 @@ export const useNoteStore = create<NoteStoreState>()(
           if (activeTab?.isDirty) {
             // 자동 저장하지 않고 탭에 content만 업데이트
             set({
-              tabs: tabs.map(tab =>
-                tab.id === activeTabId ? { ...tab, content: currentNoteContent } : tab
-              ),
+              tabs: tabs.map(tab => (tab.id === activeTabId ? { ...tab, content: currentNoteContent } : tab)),
             });
           }
         }
@@ -324,9 +322,7 @@ export const useNoteStore = create<NoteStoreState>()(
         const { tabs } = get();
         set({
           currentNote: note,
-          tabs: tabs.map(tab =>
-            tab.id === note.id ? { ...tab, title: note.title, note: note } : tab
-          ),
+          tabs: tabs.map(tab => (tab.id === note.id ? { ...tab, title: note.title, note: note } : tab)),
         });
       },
 
@@ -338,9 +334,7 @@ export const useNoteStore = create<NoteStoreState>()(
 
         set({
           currentNoteContent: content,
-          tabs: tabs.map(tab =>
-            tab.id === activeTabId ? { ...tab, isDirty, content } : tab
-          ),
+          tabs: tabs.map(tab => (tab.id === activeTabId ? { ...tab, isDirty, content } : tab)),
         });
       },
 
@@ -358,9 +352,7 @@ export const useNoteStore = create<NoteStoreState>()(
             currentNote: response.note,
             currentNoteContent: response.note.content,
             tabs: tabs.map(tab =>
-              tab.id === activeTabId
-                ? { ...tab, isDirty: false, note: response.note, content: response.note.content }
-                : tab
+              tab.id === activeTabId ? { ...tab, isDirty: false, note: response.note, content: response.note.content } : tab
             ),
             isSaving: false,
           });
@@ -407,7 +399,7 @@ export const useNoteStore = create<NoteStoreState>()(
 
         // 노트 리스트 갱신
         await get().loadNotes();
-        
+
         // 태그 리스트 갱신
         await get().loadTags();
 
@@ -470,11 +462,11 @@ export const useNoteStore = create<NoteStoreState>()(
 
         // 복원 시 유효성 검사: note가 null인 탭 제거
         const validTabs = state.tabs.filter(tab => tab.note !== null);
-        
+
         // 유효하지 않은 탭이 있었다면 정리
         if (validTabs.length !== state.tabs.length) {
           state.tabs = validTabs;
-          
+
           // activeTabId가 유효하지 않은 탭을 가리키면 초기화
           const activeTabExists = validTabs.some(tab => tab.id === state.activeTabId);
           if (!activeTabExists) {

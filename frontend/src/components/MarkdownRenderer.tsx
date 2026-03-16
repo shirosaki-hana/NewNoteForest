@@ -29,7 +29,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   // 테마 모드에 따라 highlight.js CSS를 동적으로 로드
   useEffect(() => {
     const isDark = theme.palette.mode === 'dark';
-    
+
     // 동적으로 로컬 CSS import
     if (isDark) {
       import('highlight.js/styles/github-dark.css');

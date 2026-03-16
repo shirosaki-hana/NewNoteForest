@@ -86,8 +86,7 @@ export default function NoteTabBar({ onMenuClick }: NoteTabBarProps) {
               justifyContent: 'center',
               px: 2,
             }}
-          >
-          </Box>
+          ></Box>
         ) : (
           tabs.map(tab => (
             <Box
